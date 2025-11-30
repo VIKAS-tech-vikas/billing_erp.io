@@ -31,15 +31,15 @@ html, body{
   box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* 🔥 Updated Logo - Bigger + Right Spacing */
+/* LOGO */
 .brand{
   display:flex;
   align-items:center;
-  margin-left:30px;     /* ⬅ right side shift */
+  margin-left:30px;
   margin-right:25px;
 }
 .brand .logo{
-  height:115px;         /* ⬅ size increased */
+  height:50px;
   width:auto;
   object-fit:contain;
 }
@@ -78,30 +78,44 @@ html, body{
   border:0;
 }
 
-/* ===== MOBILE MENU ===== */
+/* ===== MOBILE MENU (Overlay + Scroll + Animation) ===== */
 @media (max-width:992px){
-  .navbar-collapse{
-    width:100%;
-    margin-top:10px;
-    justify-content:flex-start;
-  }
 
   #mainNav{
+    position:absolute;
+    top:68px;
+    left:0;
+    width:100%;
     background:var(--primary);
     padding:14px 0;
-    border-radius:8px;
+    border-radius:0 0 14px 14px;
+    z-index:999;
+    box-shadow:0 6px 12px rgba(0,0,0,0.15);
+
+    max-height:75vh;
+    overflow-y:auto;
+    animation: dropdownFade 0.25s ease;
+  }
+
+  @keyframes dropdownFade {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .navbar-collapse.collapse.show{
+    display:block !important;
   }
 
   .navbar-nav{
     flex-direction:column;
     align-items:flex-start;
-    gap:4px;
-    padding-left:14px;
+    gap:6px;
+    padding-left:16px;
   }
 
   .navbar-nav .nav-link{
-    font-size:16px;
-    padding:9px 4px;
+    font-size:17px;
+    padding:8px 0;
     width:100%;
     text-align:left;
   }
@@ -109,14 +123,14 @@ html, body{
   .mobile-username{
     color:#fff;
     font-weight:700;
-    padding:6px 14px;
+    padding:6px 16px;
   }
 
   .mobile-logout{
     background:#ff4d4f;
     border-radius:6px;
-    padding:8px 10px;
-    margin:4px 14px;
+    padding:8px 12px;
+    margin:6px 16px;
     color:#fff !important;
     font-weight:700;
     display:inline-block;
@@ -126,16 +140,15 @@ html, body{
     display:none !important;
   }
 
-  /* 🔥 Keep logo big in mobile also */
   .brand{
     margin-left:18px;
   }
-  .brand .logo{
-    height:95px;
-  }
 }
 
-main{ min-height:calc(100vh - 68px); }
+/* min height below navbar */
+main{
+  min-height:calc(100vh - 68px);
+}
 </style>
 
 {% block extra_head %}{% endblock %}
@@ -182,15 +195,26 @@ main{ min-height:calc(100vh - 68px); }
     {% if request.user.is_authenticated %}
       <a class="logout-btn d-none d-lg-inline-flex" href="{% url 'logout' %}">Logout</a>
     {% endif %}
-
   </div>
 </nav>
 
 <main class="container-fluid">
-  <div class="container">{% block content %}{% endblock %}</div>
+  {% block content %}{% endblock %}
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 🔥 Menu Auto Close Script -->
+<script>
+  document.querySelectorAll('#mainNav .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      let navbar = document.getElementById('mainNav');
+      let bsCollapse = bootstrap.Collapse.getOrCreateInstance(navbar);
+      bsCollapse.hide();
+    });
+  });
+</script>
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>
