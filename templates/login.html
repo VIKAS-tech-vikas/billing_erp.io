@@ -1,0 +1,134 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | Manual Billing System</title>
+
+  <!-- Optional: load a system font or your static CSS -->
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+
+  <style>
+    /* Mobile-first clean login card */
+    :root{
+      --accent: #007bff;
+      --bg: #f4f6f9;
+      --card:#fff;
+      --muted:#eef5ff;
+      --radius:12px;
+      --tap:44px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family: "Segoe UI", Roboto, Arial, sans-serif;background:var(--bg);-webkit-font-smoothing:antialiased}
+    .page-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+
+    .login-box{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:1.5rem 1.25rem;
+      box-shadow: 0 8px 24px rgba(15,23,36,0.08);
+      text-align:center;
+    }
+
+    .brand {
+      font-size:1.25rem;
+      color:var(--accent);
+      margin-bottom:0.6rem;
+    }
+
+    .login-sub {
+      color: rgba(15,23,36,0.65);
+      margin-bottom: 0.85rem;
+      font-size:0.95rem;
+    }
+
+    form { margin-top: 0.5rem; display:block; }
+    .field { width:100%; margin-bottom:0.65rem; }
+    input[type="text"], input[type="password"]{
+      width:100%;
+      padding:0.9rem 0.95rem;
+      border-radius:8px;
+      border:1px solid rgba(15,23,36,0.08);
+      background:var(--muted);
+      font-size:1rem;
+      outline:none;
+    }
+    input:focus{ box-shadow:0 6px 18px rgba(11,120,255,0.10); transform: translateY(-1px); border-color: rgba(11,120,255,0.2); }
+
+    button.submit {
+      width:100%;
+      padding:0.95rem;
+      border-radius:8px;
+      border:0;
+      background:linear-gradient(180deg,var(--accent), #0066d6);
+      color:#fff;
+      font-weight:600;
+      font-size:1rem;
+      min-height:var(--tap);
+      cursor:pointer;
+    }
+
+    .error { color:#c62828; margin-bottom:0.5rem; font-size:0.95rem; text-align:left; }
+
+    .footer {
+      margin-top:0.9rem;
+      color: rgba(15,23,36,0.6);
+      font-size:0.9rem;
+    }
+
+    /* small devices */
+    @media (max-width:480px){
+      .login-box{ padding:1.1rem; border-radius:10px; }
+      .brand{font-size:1.05rem}
+      input[type="text"], input[type="password"]{ padding:0.85rem; font-size:0.97rem; }
+      .footer{ font-size:0.85rem }
+    }
+
+    /* print: hide non-essential stuff */
+    @media print {
+      .footer, button, form { display:none !important; }
+      body { background: white; margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="login-box" role="main" aria-labelledby="login-heading">
+      <div class="brand">🔐 Manual Billing System</div>
+      <div id="login-heading" class="login-sub">Please sign in to continue</div>
+
+      {% if messages %}
+  {% for message in messages %}
+    {% if message.tags == "error" %}
+      <p style="color:red;">{{ message }}</p>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+
+      <!-- Use named URL so trailing slash is correct -->
+      <form action="{% url 'login' %}" method="post" autocomplete="on" novalidate>
+        {% csrf_token %}
+        <div class="field">
+          <label for="id_username" class="visually-hidden">Username</label>
+          <input id="id_username" name="username" type="text" placeholder="Username" required autofocus value="{{ request.POST.username|default:'' }}" />
+        </div>
+
+        <div class="field">
+          <label for="id_password" class="visually-hidden">Password</label>
+          <input id="id_password" name="password" type="password" placeholder="Password" required />
+        </div>
+
+        <button type="submit" class="submit">Login</button>
+      </form>
+
+      <div class="footer" aria-hidden="true">
+        💻 Developed by <strong>Vikas</strong>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

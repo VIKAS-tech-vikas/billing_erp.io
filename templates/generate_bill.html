@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Estimate Print</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+        }
+
+        .invoice-box {
+            width: 100%;
+            max-width: 780px;
+            margin: 0 auto;
+            border: 1px solid #000;
+            padding: 12px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 12px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .summary-table {
+            width: 100%;
+            max-width: 380px;
+            margin-left: auto;
+            font-size: 14px;
+        }
+
+        .summary-table td {
+            padding: 5px;
+            border: 1px solid #000;
+        }
+
+        .summary-table .label { text-align: left; }
+        .summary-table .value { text-align: right; font-weight: bold; }
+
+        .floating-btn {
+            padding: 8px 18px;
+            background: white;
+            border: 1px solid black;
+            cursor: pointer;
+            position: fixed;
+            bottom: 18px;
+            z-index: 999;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        #printBtn { left: 15px; }
+        #backBtn { right: 15px; }
+
+        /* ---------- MOBILE FULL RESPONSIVE ---------- */
+        @media (max-width: 600px) {
+            .invoice-box {
+                border: none;
+                padding: 8px;
+                margin: 0;
+            }
+            table {
+                font-size: 13px;
+            }
+            th, td {
+                padding: 4px;
+            }
+            .floating-btn {
+                width: 44%;
+                font-size: 14px;
+            }
+            .summary-table {
+                width: 100%;
+            }
+        }
+
+        /* ---------- PRINT SETTINGS ---------- */
+        @media print {
+            #printBtn, #backBtn { display: none !important; }
+
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+            }
+
+            .invoice-box {
+                width: 100% !important;
+                border: 1px solid #000 !important;
+                page-break-inside: avoid;
+            }
+
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+        }
+    </style>
+
+    {% if request.GET.print %}
+    <script>
+        window.onload = () => window.print();
+    </script>
+    {% endif %}
+</head>
+<body>
+
+{% for copy in "12" %}
+<div class="invoice-box">
+
+    <div class="header-row">
+        <div>
+            {{ bill.customer_name }}<br>
+            {{ bill.phone }}
+        </div>
+        <div style="text-align:right;">
+            No: {{ bill.bill_no }}<br>
+            Date: {{ bill.date|date:"d M y" }}
+        </div>
+    </div>
+
+    <div class="section-title">
+        {% if forloop.first %} ESTIMATE {% else %} CUSTOMER COPY {% endif %}
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Item Description</th>
+            <th>Qty/Wt</th>
+            <th>Rate</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.description }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.rate }}</td>
+            <td>₹{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="summary-table">
+        <tr>
+            <td class="label">Total (Products)</td>
+            <td class="value">₹{{ items_total }}</td>
+        </tr>
+
+        {% if packing_total > 0 %}
+        <tr>
+            <td class="label">{{ packing_reason }}</td>
+            <td class="value">₹{{ packing_total }}</td>
+        </tr>
+        {% endif %}
+
+        {% if extra_amount > 0 %}
+        <tr>
+            <td class="label">{{ bill.extra_reason|default:"Extra Charges" }}</td>
+            <td class="value">₹{{ extra_amount }}</td>
+        </tr>
+        {% endif %}
+
+        <tr>
+            <td class="label"><b>Bill Amount</b></td>
+            <td class="value"><b>₹{{ final_total }}</b></td>
+        </tr>
+    </table>
+</div>
+{% endfor %}
+
+<button id="printBtn" class="floating-btn" onclick="window.print()">🖨 Print / PDF</button>
+<button id="backBtn" class="floating-btn" onclick="goBack()">⬅ Back</button>
+
+<script>
+function goBack() {
+    const prev = document.referrer;
+    if (prev && prev !== window.location.href) window.location.href = prev;
+    else history.back();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Manual Billing System{% endblock %}
+
+{% block content %}
+
+<style>
+  :root{
+    --primary:#007bff;
+    --muted:#6c757d;
+    --bg:#f4f6f9;
+  }
+
+  .dashboard-wrapper{
+    width:100%;
+    min-height: calc(100vh - 170px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:35px 20px;
+  }
+
+  /* BLUE BACKGROUND BOX */
+  .dashboard-blue-box{
+    background:#007bff;
+    width:100%;
+    max-width:1100px;
+    padding:26px;
+    border-radius:14px;
+  }
+
+  /* WHITE PANEL */
+  .dashboard-panel{
+    background:#fff;
+    padding:32px;
+    border-radius:14px;
+    max-width:600px;
+    width:100%;
+    margin:auto;
+    text-align:center;
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .panel-title{
+    font-size:1.6rem;
+    font-weight:800;
+    color:#007bff;
+  }
+
+  .panel-sub{
+    color:var(--muted);
+    margin-bottom:20px;
+  }
+
+  .dashboard-panel .btn{
+    display:block;
+    width:80%;
+    margin:12px auto;
+    padding:12px;
+    font-weight:700;
+    border-radius:10px;
+  }
+
+  /* 📱 Responsive Fix for Mobile */
+  @media (max-width: 768px){
+    .dashboard-wrapper{
+      min-height: calc(100vh - 120px);
+      padding-top: 20px;
+    }
+    .dashboard-blue-box{
+      padding:18px;
+    }
+    .dashboard-panel{
+      padding:25px;
+      width:90%;
+    }
+  }
+
+  @media (max-width: 500px){
+    .dashboard-panel .btn{
+      width:100%;
+    }
+  }
+</style>
+
+<div class="dashboard-wrapper">
+  <div class="dashboard-blue-box">
+    <div class="dashboard-panel">
+      <h2 class="panel-title">Welcome</h2>
+
+      <a href="{% url 'create_bill' %}" class="btn btn-primary">Create New Bill</a>
+      <a href="{% url 'customer_statement' %}" class="btn btn-secondary">Customer Statement</a>
+      <a href="{% url 'customer_monthly_statement' %}" class="btn btn-secondary">Monthly Statement</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

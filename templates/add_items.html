@@ -1,0 +1,210 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create Estimate | Manual Billing System</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'css/responsive.css' %}" rel="stylesheet">
+
+  <style>
+    :root{ --accent:#007bff; --card:#fff; --muted:#eef5ff; --radius:10px; --tap:44px; }
+    body { background:#f4f6f9; font-family:'Segoe UI',sans-serif; margin:0; }
+    .card { border-radius:var(--radius); box-shadow:0 6px 18px rgba(15,23,36,0.06); border:none; }
+    .card-header { background:var(--accent); color:#fff; font-weight:600; }
+    input[readonly]{ background:#eef2f7; }
+    .btn { min-height:var(--tap); display:inline-flex; align-items:center; justify-content:center; }
+  </style>
+</head>
+<body>
+
+<div class="container my-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <h4 class="mb-0">📋 Create Estimate</h4>
+      <small class="text-white">Bill #: {{ bill.bill_no }}</small>
+    </div>
+
+    <div class="card-body">
+
+      <!-- CUSTOMER -->
+      <h6 class="text-primary mb-3">Customer Details</h6>
+      <div class="row g-2 mb-3">
+        <div class="col-md-3"><label class="form-label small">Customer Name</label><input type="text" class="form-control" value="{{ bill.customer_name }}" readonly></div>
+        <div class="col-md-3"><label class="form-label small">Mobile</label><input type="text" class="form-control" value="{{ bill.phone }}" readonly></div>
+
+        <!-- 🔥 Calendar Added -->
+        <div class="col-md-3">
+          <label class="form-label small">Date</label>
+          <input type="date" id="bill_date" class="form-control" value="{{ bill.date|date:'Y-m-d' }}">
+        </div>
+
+        <div class="col-md-3"><label class="form-label small">Bill No</label><input type="text" class="form-control" value="{{ bill.bill_no }}" readonly></div>
+      </div>
+
+      <hr>
+
+      <!-- ADD PRODUCT -->
+      <h6 class="text-primary mb-2">Add Product Details</h6>
+      <div class="row g-2 mb-2 align-items-end">
+        <div class="col-md-4"><label class="form-label small">Product Name</label><input type="text" id="product_name" class="form-control"></div>
+        <div class="col-md-2"><label class="form-label small">Quantity</label><input type="number" id="quantity" class="form-control"></div>
+        <div class="col-md-2"><label class="form-label small">Rate</label><input type="number" id="rate" class="form-control"></div>
+        <div class="col-md-2"><label class="form-label small">Total</label><input type="text" id="total" class="form-control" readonly></div>
+        <div class="col-md-2"><button class="btn btn-success w-100" onclick="addProduct()">➕</button></div>
+      </div>
+
+      <hr>
+
+      <!-- TABLE -->
+      <h6 class="text-primary mb-2">Product List</h6>
+      <table class="table table-bordered table-sm" id="product-table">
+        <thead class="table-primary">
+        <tr><th>Product</th><th>Quantity</th><th>Rate</th><th>Total</th><th>Action</th></tr>
+        </thead><tbody></tbody>
+      </table>
+
+      <!-- PACKING + EXTRA -->
+      <div class="row g-2 mt-3">
+        <div class="col-md-4">
+          <input type="text" id="extra_reason" class="form-control" placeholder="Extra Charge / Reason">
+        </div>
+        <div class="col-md-2">
+          <input type="number" id="packing_qty" class="form-control" value="0">
+        </div>
+        <div class="col-md-2">
+          <input type="number" id="packing_rate" class="form-control" value="0">
+        </div>
+        <div class="col-md-3">
+          <input type="text" id="packing_reason" class="form-control" placeholder="Packing Reason">
+        </div>
+        <div class="col-md-1">
+          <input type="text" id="packing_total" class="form-control" readonly value="0.00">
+        </div>
+      </div>
+
+      <div class="text-end mt-3">
+        <div><b>Total (Without Packing): ₹ <span id="grand-total">0.00</span></b></div>
+        <div class="text-success"><b>Final Total (With Packing): ₹ <span id="final-total">0.00</span></b></div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button class="btn btn-primary px-4" onclick="saveAndGenerate()">💾 Save & Generate Bill</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary px-4">⬅ Back</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function getCookie(n){return document.cookie.split('; ').reduce((r,v)=>{const p=v.split('=');return p[0]===n?decodeURIComponent(p[1]):r;},null);}
+const CSRF_TOKEN = getCookie("csrftoken");
+let products = [];
+
+const qtyEl  = document.getElementById("quantity");
+const rateEl = document.getElementById("rate");
+
+qtyEl.addEventListener("input", updateTotal);
+rateEl.addEventListener("input", updateTotal);
+document.getElementById("packing_qty").addEventListener("input", updateFinalTotal);
+document.getElementById("packing_rate").addEventListener("input", updateFinalTotal);
+
+function updateTotal(){
+  const qty  = +qtyEl.value  || 0;
+  const rate = +rateEl.value || 0;
+  document.getElementById("total").value = (qty * rate).toFixed(2);
+}
+
+function addProduct(){
+  const name = document.getElementById("product_name").value.trim();
+  const qty  = +qtyEl.value || 0;
+  const rate = +rateEl.value || 0;
+  const total = qty * rate;
+
+  if(!name) return alert("Enter product name");
+  if(qty <= 0) return alert("Invalid quantity");
+
+  products.push({ description: name, qty, rate, total });
+  renderTable();
+  resetForm();
+}
+
+function renderTable(){
+  const tbody = document.querySelector("#product-table tbody");
+  tbody.innerHTML = "";
+  let grand = 0;
+
+  products.forEach((p,i) => {
+    grand += p.total;
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.description}</td>
+        <td>${p.qty}</td>
+        <td>₹${p.rate.toFixed(2)}</td>
+        <td>₹${p.total.toFixed(2)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="removeProduct(${i})">🗑️</button></td>
+      </tr>`;
+  });
+
+  document.getElementById("grand-total").innerText = grand.toFixed(2);
+  updateFinalTotal();
+}
+
+function updateFinalTotal(){
+  const grand = +document.getElementById("grand-total").innerText || 0;
+  const pq = +document.getElementById("packing_qty").value || 0;
+  const pr = +document.getElementById("packing_rate").value || 0;
+  const packing = pq * pr;
+  document.getElementById("packing_total").value = packing.toFixed(2);
+  document.getElementById("final-total").innerText = (grand + packing).toFixed(2);
+}
+
+function removeProduct(i){ products.splice(i,1); renderTable(); }
+
+function resetForm(){
+  document.getElementById("product_name").value = "";
+  qtyEl.value = "";
+  rateEl.value = "";
+  document.getElementById("total").value = "";
+  document.getElementById("product_name").focus();
+}
+
+async function saveAndGenerate(){
+  if(products.length === 0) return alert("Add at least 1 product");
+
+  const payload = {
+    bill_date: document.getElementById("bill_date").value,   // 🔥 Date added
+    items: products.map(p => ({
+      description: p.description,
+      quantity: p.qty,
+      rate: p.rate,
+      total: p.total
+    })),
+    packing_qty: +document.getElementById("packing_qty").value || 0,
+    packing_rate: +document.getElementById("packing_rate").value || 0,
+    packing_reason: document.getElementById("packing_reason").value.trim() || "Packing",
+    extra_reason: document.getElementById("extra_reason")?.value?.trim() || "",
+    extra_amount: 0
+  };
+
+  const res = await fetch(window.location.href, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF_TOKEN },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+
+  if(!data.success){
+    alert("❌ Error saving bill");
+    return;
+  }
+
+  window.open(`/generate-bill/${data.bill_id}/?print=1`, "_blank");
+}
+</script>
+</body>
+</html>

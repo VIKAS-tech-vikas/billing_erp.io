@@ -1,0 +1,126 @@
+/* static/css/responsive.css
+   Mobile-first global overrides for the billing app
+   Updated to avoid mobile side white-space and ensure full-width containers
+   Screenshot reference: /mnt/data/4f33368a-548f-416e-b6f3-af15ff5a387f.png
+*/
+
+:root{
+  --bg: #f3f6f8;
+  --card: #fff;
+  --accent: #0b78ff;
+  --muted: #eef5ff;
+  --radius: 12px;
+  --tap-size: 44px;
+  --max-center-width: 920px;
+}
+
+/* Reset box sizing */
+* { box-sizing: border-box; }
+
+/* Body */
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: #0f1724;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* prevent horizontal scroll / white-gap */
+}
+
+/* Page container: use full width by default to avoid mobile white-space */
+/* This targets both Bootstrap container and container-fluid usage */
+main.container,
+main.container-fluid {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin: 0 auto;
+}
+
+/* Card styles used across pages */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(15,23,36,0.06);
+  max-width: 100%;
+}
+
+/* Larger touch targets */
+.btn, .nav-link { min-height: var(--tap-size); display: inline-flex; align-items: center; gap: .4rem; }
+
+/* Utility stacks */
+.stack-sm { display:flex; flex-direction:column; gap:.6rem; }
+.row-gap { gap: .6rem; }
+
+/* Form controls */
+input[type='text'], input[type='password'], input[type='number'], textarea, select {
+  width:100%;
+  padding:0.9rem 1rem;
+  border-radius:8px;
+  border:1px solid rgba(15,23,36,0.06);
+  background: var(--muted);
+  font-size:1rem;
+  box-sizing: border-box;
+}
+
+/* Numeric input helper - mobile numeric keyboard */
+input[data-numeric], input[type='number'] { ime-mode: disabled; }
+
+/* Tables: responsive wrapper for horizontal scroll on small screens */
+.table-responsive { width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; }
+
+/* Item rows: flexible layout that stacks on small screens */
+.items-row { display:flex; gap:0.5rem; align-items:flex-start; }
+.items-row .col { flex:1; min-width: 0; } /* min-width:0 lets flex children shrink */
+@media (max-width: 720px) {
+  .items-row { flex-direction: column; }
+}
+
+/* Sidebar behavior: hide on small screens by default (show via hamburger) */
+.sidebar { width: 260px; }
+@media (max-width: 992px) {
+  .sidebar { display: none; }
+}
+
+/* Full-bleed pages (login / print preview) - avoid forcing 100% height unless intentional */
+.full-bleed { width:100%; max-width:100%; padding:0; margin:0; }
+.full-bleed .page-wrap { min-height: auto; display:flex; align-items:stretch; justify-content:center; }
+.full-bleed .card { width:100%; height:auto; max-width:none; border-radius:0; box-shadow:none; border:none; overflow:hidden; display:flex; flex-direction:column; }
+.full-bleed .card-body { overflow-y:auto; -webkit-overflow-scrolling:touch; padding: 12px; }
+
+/* Small-screen specifics */
+@media (max-width: 720px) {
+  main.container, main.container-fluid { padding-left: 10px; padding-right: 10px; }
+  .card { padding: 0.85rem; border-radius: 10px; }
+  input[type='text'], input[type='password'] { padding: 0.8rem; font-size: 0.98rem; }
+  .btn { width: 100%; padding: 0.9rem; }
+}
+
+/* Very small devices */
+@media (max-width: 480px) {
+  .navbar-brand { font-size: 1rem; }
+  .nav-link { font-size: 0.95rem; }
+  footer { font-size: 13px; padding: 8px; }
+  .card { padding: 0.7rem; }
+}
+
+/* Print rules */
+@media print {
+  .navbar, footer, .btn, form { display: none !important; }
+  body { background: white; margin: 10mm; }
+  table { font-size: 12px !important; }
+}
+
+/* Accessibility: focus outlines */
+a:focus, button:focus, input:focus, select:focus { outline: 3px solid rgba(11,120,255,0.12); outline-offset: 2px; }
+
+/* Tiny helper classes */
+.mt-1 { margin-top: .5rem; }
+.mb-1 { margin-bottom: .5rem; }
+.text-muted { color: rgba(15,23,36,0.6); }

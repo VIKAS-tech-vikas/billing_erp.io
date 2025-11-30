@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Customer</title>
+  <style>
+    body { font-family: 'Segoe UI'; background:#f5f6fa; margin:0; }
+    .container { width:400px; margin:60px auto; background:white; padding:25px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1); }
+    h2 { text-align:center; color:#007bff; }
+    input, textarea { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; }
+    button { background:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; }
+    button:hover { background:#005ec6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Edit Customer</h2>
+    <form method="POST">
+      {% csrf_token %}
+      <label>Name</label>
+      <input type="text" name="name" value="{{ customer.name }}" required>
+
+      <label>Phone</label>
+      <input type="text" name="phone" value="{{ customer.phone }}">
+
+      <label>Address</label>
+      <textarea name="address">{{ customer.address }}</textarea>
+
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Payment - Bill #{{ bill.bill_no }}</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f3f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #007bff;
+      color: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .navbar a {
+      background: #dc3545;
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .navbar a:hover {
+      background: #b02a37;
+    }
+
+    /* Container */
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 {
+      color: #007bff;
+      font-size: 22px;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #333;
+      align-self: flex-start;
+      margin-left: 15%;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 75%;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .bill-summary {
+      text-align: left;
+      margin-top: 25px;
+      background: #f9fbff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #dbe5ff;
+    }
+
+    .bill-summary p {
+      margin: 6px 0;
+      font-size: 15px;
+    }
+
+    .bill-summary strong {
+      color: #007bff;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 25px;
+      color: #555;
+      text-decoration: none;
+      background: #e9ecef;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #ced4da;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="navbar">
+    <h1>Manual Billing System</h1>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+
+  <div class="container">
+    <h2>💵 Add Payment for Bill #{{ bill.bill_no }}</h2>
+
+    <form method="POST">
+      {% csrf_token %}
+      <label>Amount Received:</label>
+      <input type="number" name="amount" placeholder="Enter amount" step="0.01" required>
+
+      <label>Note (optional):</label>
+      <input type="text" name="note" placeholder="Enter note (e.g. Full Payment, Partial, etc.)">
+
+      <button type="submit">💾 Save Payment</button>
+    </form>
+
+    <div class="bill-summary">
+      <p><strong>Total Bill:</strong> ₹{{ bill.total_amount }}</p>
+      <p><strong>Already Paid:</strong> ₹{{ bill.paid_amount }}</p>
+      <p><strong>Remaining:</strong> ₹{{ bill.remaining_amount }}</p>
+    </div>
+
+    <a href="{% url 'customer_statement' %}" class="back-btn">⬅ Back to Customer Statement</a>
+  </div>
+</body>
+</html>

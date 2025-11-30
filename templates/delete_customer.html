@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Delete Customer</title>
+  <style>
+    body { font-family:'Segoe UI'; background:#f5f6fa; margin:0; }
+    .container { width:400px; margin:80px auto; background:white; padding:30px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1); text-align:center; }
+    h2 { color:#dc3545; }
+    button, a { margin:10px; padding:10px 15px; border:none; border-radius:5px; text-decoration:none; color:white; cursor:pointer; }
+    .btn-delete { background:#dc3545; }
+    .btn-cancel { background:#6c757d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Are you sure?</h2>
+    <p>You are about to delete <b>{{ customer.name }}</b>.</p>
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit" class="btn-delete">Yes, Delete</button>
+      <a href="{% url 'view_customers' %}" class="btn-cancel">Cancel</a>
+    </form>
+  </div>
+</body>
+</html>

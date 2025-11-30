@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="text-center mb-4 d-print-none">
+    <h4 class="fw-bold text-primary">Customer Statement by Date Range</h4>
+  </div>
+
+  <form method="GET" class="row g-2 justify-content-center mb-3 d-print-none">
+    <div class="col-md-3 col-12">
+      <input type="text" name="customer_name" value="{{ customer_name }}" class="form-control"
+        placeholder="Enter Customer Name">
+    </div>
+    <div class="col-md-3 col-12">
+      <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+    </div>
+    <div class="col-md-3 col-12">
+      <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+    </div>
+    <div class="col-md-2 col-12">
+      <button type="submit" class="btn btn-primary w-100">Show Statement</button>
+    </div>
+  </form>
+
+
+  {% if bills %}
+  <div class="invoice-box">
+      <div class="print-heading d-print-block text-center fw-bold mb-2">
+        CUSTOMER MONTHLY STATEMENT <br>
+        <span style="font-size: 15px; font-weight: 600;">
+          {{ customer_name }} — {{ start_date }} to {{ end_date }}
+        </span>
+      </div>
+
+      <table class="table-bordered text-center align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th>Date</th>
+            <th>Bill No</th>
+            <th>Customer</th>
+            <th>Total Amount</th>
+            <th>Returns</th>
+            <th>Paid</th>
+            <th>Remaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bill in bills %}
+          <tr>
+            <td>{{ bill.date|date:"M. d, Y" }}</td>
+            <td>{{ bill.bill_no }}</td>
+            <td>{{ bill.customer_name }}</td>
+            <td>₹{{ bill.total_display|floatformat:2 }}</td>
+            <td>₹{{ bill.returns_total|floatformat:2 }}</td>
+            <td>₹{{ bill.positive_paid|floatformat:2 }}</td>
+            <td>₹{{ bill.remaining_display|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="fw-bold">
+          <tr>
+            <td colspan="3" class="text-end">Totals:</td>
+            <td>₹{{ total_amount|floatformat:2 }}</td>
+            <td>₹{{ total_returns|floatformat:2 }}</td>
+            <td>₹{{ total_paid|floatformat:2 }}</td>
+            <td>₹{{ total_remaining|floatformat:2 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center mt-4">
+    No statements found for this date range.
+  </div>
+  {% endif %}
+  
+  <div class="statement-buttons mb-4 d-flex justify-content-center gap-2 flex-wrap d-print-none">
+    <button class="btn btn-outline-success action-btn" type="button" onclick="window.print()">Print</button>
+  </div>
+
+</div>
+
+<style>
+/* Main container */
+.invoice-box {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  border: 1px solid #000;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: white;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Form inputs */
+input.form-control {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+input.form-control::placeholder {
+  color: #6c757d !important;
+}
+
+/* Statement buttons */
+.statement-buttons .action-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  min-width: 110px;
+}
+
+/* ---------- PRINT CSS ---------- */
+@media print {
+  .d-print-none, .btn, form, footer, nav, header {
+    display: none !important;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .container {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .invoice-box {
+    width: 100% !important;
+    border: 2px solid #000 !important;
+    padding: 12px !important;
+    margin: 0 !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 15px !important;
+  }
+
+  th, td {
+    border: 2px solid #000 !important;
+    padding: 8px 6px !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
+
+/* ---------- MOBILE FIX (NO ZOOM-OUT) ---------- */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .invoice-box {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  table th, table td {
+    font-size: 13px !important;
+    padding: 6px 4px !important;
+  }
+}
+
+/* Print heading */
+.print-heading { display: none; }
+@media print { .print-heading { display: block !important; } }
+</style>
+
+{% endblock %}

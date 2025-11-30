@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ customer.name }} – Details</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<style>
+:root{
+  --blue:#007bff; --danger:#dc3545; --green:#28a745;
+  --muted:#777; --card-bg:#f8fbff; --page-bg:#f3f6fa;
+}
+body { font-family:"Segoe UI"; background:var(--page-bg); margin:0; color:#222 }
+.navbar { background:var(--blue); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap }
+
+.container {
+  width:100%; max-width:1100px; margin:10px auto; background:#fff;
+  border-radius:12px; padding:16px; box-sizing:border-box;
+}
+
+.header-card {
+  background:var(--card-bg); padding:14px; border-radius:10px;
+  display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px;
+}
+
+.bill-card{
+  background:#ffffff; border-radius:10px; border:1px solid #d2d2d2;
+  margin-bottom:18px; box-shadow:0 2px 6px rgba(0,0,0,.03);
+}
+
+.bill-header-table{ width:100%; border-collapse:collapse; }
+.bill-header-table thead th{
+  background:var(--blue); color:#fff; padding:10px; text-align:center;
+  font-size:14px; border:1px solid #005bd1;
+}
+.bill-header-table tbody td{
+  border:1px solid #bfbfbf; padding:10px; text-align:center; font-size:14px;
+}
+
+/* ⭐ Big numbers wrapping FIX */
+.bill-header-table tbody td:nth-child(3),
+.bill-header-table tbody td:nth-child(4),
+.bill-header-table tbody td:nth-child(5),
+.bill-header-table tbody td:nth-child(6) {
+  max-width: 72px;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.25rem;
+}
+
+/* Payments Section */
+.payments-wrap{ background:#f9fbff; border-top:1px solid #bfbfbf; padding:12px 14px; }
+.payments-title{ font-weight:600; margin-bottom:6px; }
+.payments-table{ width:100%; border-collapse:collapse; font-size:13px }
+.payments-table thead th{
+  background:var(--blue); color:#fff; padding:8px; text-align:center; border:1px solid #005bd1;
+}
+.payments-table tbody td{ border:1px solid #bfbfbf; padding:8px; text-align:center; }
+
+.btn { padding:6px 11px; border-radius:7px; text-decoration:none; font-weight:600; cursor:pointer; color:#fff; font-size:14px; border:none }
+.btn-primary{background:var(--blue)}
+.btn-danger{background:var(--danger)}
+.btn-secondary{background:#6c757d}
+.btn-paid{background:var(--green)}
+.badge-paid{background:var(--green); color:#fff; padding:6px 12px; border-radius:6px; font-size:13px}
+
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none;
+  align-items:center; justify-content:center; z-index:999 }
+.modal { background:#fff; border-radius:12px; padding:18px; width:400px }
+.muted{color:var(--muted)}
+.actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+
+/* 🔥 Dark Bill Divider */
+.bill-divider {
+  border:0;
+  height:3px;
+  background:#000;
+  border-radius:6px;
+  margin:28px 0;
+}
+
+/* 🔥 Mobile Responsiveness */
+@media (max-width: 600px) {
+  .bill-header-table thead th,
+  .bill-header-table tbody td {
+    font-size:13px;
+    padding:9px 6px;
+    line-height:1.35rem;
+  }
+  .bill-header-table tbody tr { height: 48px; }
+  .payments-wrap { padding:13px; }
+  .payments-table tbody td { padding:9px 6px; }
+}
+</style>
+</head>
+
+<body>
+<div class="navbar">
+  Manual Billing System
+  <div>
+    <a href="{% url 'view_customers' %}" class="btn btn-secondary">← Back</a>
+    <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+  </div>
+</div>
+
+<div class="container">
+<h2>👤 {{ customer.name }}</h2>
+
+<div class="header-card">
+  <div><b>Phone:</b> {{ customer.phone|default:"—" }}</div>
+  <div><b>Address:</b> {{ customer.address|default:"—" }}</div>
+  <div style="margin-left:auto">
+    <a href="{% url 'create_bill' %}?customer={{ customer.name|urlencode }}" class="btn btn-primary">+ Create Bill</a>
+  </div>
+</div>
+
+{% if bills %}
+  {% for b in bills %}
+  <div class="bill-card">
+    <table class="bill-header-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Bill No</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Return</th>
+          <th>Remaining</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ b.date|date:"M d, Y" }}</td>
+          <td>{{ b.bill_no }}</td>
+          <td>₹{{ b.amount_display|floatformat:2 }}</td>
+          <td>₹{{ b.paid_display|floatformat:2 }}</td>
+          <td>₹{{ b.return_display|floatformat:2 }}</td>
+          <td>₹{{ b.remaining_display|floatformat:2 }}</td>
+          <td>
+            <div class="actions">
+              <a href="{% url 'generate_bill' b.id %}" class="btn btn-primary btn-sm">Open</a>
+              <form method="post" action="{% url 'delete_bill' b.id %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm" onclick="return confirm('Delete Bill?')">Delete</button>
+              </form>
+              {% if b.remaining_display > 0 %}
+                <button class="btn btn-paid btn-sm" onclick="openPayModal('{{ b.id }}','{{ b.remaining_display }}','{{ b.bill_no }}')">Pay</button>
+              {% else %}
+                <span class="badge-paid">Paid</span>
+              {% endif %}
+              <button class="btn btn-secondary btn-sm" onclick="openRefundModal('{{ b.id }}','{{ b.bill_no }}','{{ b.remaining_display }}')">Return</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="payments-wrap">
+      <div class="payments-title">Payments:</div>
+      <table class="payments-table">
+        <thead>
+          <tr><th>Date</th><th>Amount</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+        {% for p in b.payments.all %}
+          <tr>
+            <td>{{ p.date|date:"M d, Y" }}</td>
+            <td>
+              {% if p.amount < 0 %}
+                ₹{{ p.amount|floatformat:2|cut:"-" }} <span class="muted">(Returned)</span>
+              {% else %}
+                ₹{{ p.amount|floatformat:2 }}
+              {% endif %}
+            </td>
+            <td>{{ p.note|default:"—" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="muted">No payments found</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if not forloop.last %}
+    <hr class="bill-divider">
+  {% endif %}
+  {% endfor %}
+
+  <h3 style="text-align:right; font-size:17px; margin-top:12px">
+    💰 Total: ₹{{ total_amount|floatformat:2 }} |
+    🟢 Paid: ₹{{ total_paid|floatformat:2 }} |
+    🔁 Return: ₹{{ total_return|floatformat:2 }} |
+    ⚠ Remaining: ₹{{ total_remaining|floatformat:2 }}
+  </h3>
+
+{% else %}
+  <p class="muted">No bills found.</p>
+{% endif %}
+</div>
+
+<!-- 🔥 RETURN MODAL -->
+<div class="modal-backdrop" id="refundModal">
+  <div class="modal">
+    <h3 id="refundTitle">Return Amount</h3>
+    <form id="refundForm" method="POST">
+      {% csrf_token %}
+      <input type="number" name="amount" id="refundAmount" min="0" required
+             style="width:100%;padding:8px;margin-top:12px;font-size:16px">
+      <input type="text" name="note" placeholder="Note"
+             style="width:100%;padding:8px;margin:10px 0;font-size:15px">
+      <button type="submit" class="btn btn-danger" style="width:100%">Return</button>
+    </form>
+    <button onclick="closeRefundModal()" style="margin-top:8px;width:100%" class="btn btn-secondary">Cancel</button>
+  </div>
+</div>
+
+<!-- ⭐⭐⭐ PAY MODAL ADDED HERE ⭐⭐⭐ -->
+<div class="modal-backdrop" id="payModal">
+  <div class="modal">
+    <h3 id="payTitle">Receive Payment</h3>
+    <form id="payForm" method="POST">
+      {% csrf_token %}
+      <input type="number" name="amount" id="payAmount" min="0" required
+             style="width:100%;padding:8px;margin-top:12px;font-size:16px">
+      <input type="text" name="note" placeholder="Note"
+             style="width:100%;padding:8px;margin:10px 0;font-size:15px">
+      <button type="submit" class="btn btn-paid" style="width:100%">Receive</button>
+    </form>
+    <button onclick="closePayModal()" style="margin-top:8px;width:100%" class="btn btn-secondary">Cancel</button>
+  </div>
+</div>
+
+<script>
+function openRefundModal(billID, billNo, remaining) {
+  document.getElementById("refundModal").style.display = "flex";
+  document.getElementById("refundTitle").innerHTML = "Return — Bill #" + billNo;
+  document.getElementById("refundAmount").value = remaining;
+  document.getElementById("refundForm").action = "{% url 'return_bill' 0 %}".replace(0, billID);
+}
+function closeRefundModal() {
+  document.getElementById("refundModal").style.display = "none";
+}
+
+/* ⭐⭐⭐ PAY MODAL SCRIPT ⭐⭐⭐ */
+function openPayModal(billID, remaining, billNo) {
+  document.getElementById("payModal").style.display = "flex";
+  document.getElementById("payTitle").innerHTML = "Receive Payment — Bill #" + billNo;
+  document.getElementById("payAmount").value = remaining;
+  document.getElementById("payForm").action = "{% url 'pay_bill' 0 %}".replace(0, billID);
+}
+function closePayModal() {
+  document.getElementById("payModal").style.display = "none";
+}
+</script>
+
+</body>
+</html>

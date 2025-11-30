@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<style>
+  .page-area {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    margin-top: 70px;
+    margin-bottom: 40px;
+  }
+
+  .bill-container {
+    max-width: 800px;
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px 32px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+  }
+
+  .bill-title { 
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #007bff;
+    text-align:center;
+    margin-bottom: 25px;
+  }
+
+  label.form-label { font-size:1.05rem; font-weight:600; }
+  .form-select, .form-control { height:50px; font-size:1.05rem; }
+  .btn-primary { height:52px; font-size:1.1rem; font-weight:700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-area">
+  <div class="bill-container">
+
+    <div class="bill-title">📋 Create New Bill</div>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Customer -->
+      <label class="form-label">Customer Name:</label>
+      <select id="customerSelect" name="customer_name" class="form-select" required>
+        <option value="">-- Select Customer --</option>
+        {% for c in customers %}
+          <option value="{{ c.name }}" data-phone="{{ c.phone }}">{{ c.name }} ({{ c.phone }})</option>
+        {% endfor %}
+      </select>
+
+      <!-- Phone Auto -->
+      <label class="form-label mt-3">Mobile:</label>
+      <input type="text" id="phoneField" class="form-control" name="phone" placeholder="Auto filled" readonly>
+
+      <!-- Date -->
+      <label class="form-label mt-3">Date:</label>
+      <input type="date" name="date" id="billDate" class="form-control"
+             required value="{{ default_date|date:'Y-m-d' }}"
+             max="{{ default_date|date:'Y-m-d' }}">  <!-- ⛔ Future date not selectable -->
+
+      <!-- Bill Number -->
+      <label class="form-label mt-3">Bill Number:</label>
+      <input type="text" class="form-control" value="{{ next_bill_no }}" readonly>
+
+      <button class="btn btn-primary w-100 mt-4">Done</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  $(document).ready(function(){
+    $('#customerSelect').select2({
+      placeholder: 'Search or Select Customer',
+      allowClear: true,
+      width: '100%',
+      matcher: function(params, data) {
+        if ($.trim(params.term) === '') {
+          if (data.element.value === '') return null;
+          return data;
+        }
+        const term = params.term.toLowerCase();
+        return (data.text || '').toLowerCase().indexOf(term) > -1 ? data : null;
+      }
+    });
+
+    // Auto phone fill
+    $('#customerSelect').on('change', function(){
+      let phone = $('#customerSelect option:selected').attr('data-phone');
+      $('#phoneField').val(phone || "");
+    });
+
+    // Block future date with JS safeguard
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("billDate").setAttribute("max", today);
+  });
+</script>
+{% endblock %}
