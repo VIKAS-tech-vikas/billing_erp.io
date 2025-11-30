@@ -22,6 +22,7 @@ html, body{
   font-family:'Segoe UI',system-ui,Arial;
 }
 
+/* TOP NAVBAR */
 .site-navbar{
   background:var(--primary);
   padding:6px 14px;
@@ -31,7 +32,7 @@ html, body{
   box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* LOGO */
+/* BRAND LOGO */
 .brand{
   display:flex;
   align-items:center;
@@ -41,14 +42,9 @@ html, body{
 .brand .logo{
   height:50px;
   width:auto;
-  object-fit:contain;
 }
 
-.navbar-collapse{
-  flex-grow:1;
-  display:flex;
-  justify-content:center;
-}
+/* DESKTOP NAV */
 .navbar-nav{
   display:flex;
   flex-direction:row;
@@ -73,82 +69,67 @@ html, body{
   margin-left:auto;
 }
 
-.navbar-toggler{
-  margin-left:auto;
-  border:0;
-}
+.navbar-toggler{ margin-left:auto; border:0; }
 
-/* ===== MOBILE MENU (Overlay + Scroll + Animation) ===== */
+/* 📌 MOBILE MENU — FAST, OVERLAY, NO CONTENT PUSH */
 @media (max-width:992px){
 
   #mainNav{
-    position:absolute;
+    position:fixed;
     top:68px;
     left:0;
     width:100%;
     background:var(--primary);
-    padding:14px 0;
+    padding:16px 0;
     border-radius:0 0 14px 14px;
-    z-index:999;
-    box-shadow:0 6px 12px rgba(0,0,0,0.15);
-
+    z-index:2000;
+    display:none;
     max-height:75vh;
     overflow-y:auto;
-    animation: dropdownFade 0.25s ease;
+    animation:fadeIn .17s ease-out;
   }
 
-  @keyframes dropdownFade {
-    from { opacity:0; transform:translateY(-6px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
+  .navbar-collapse.show{ display:block !important; }
 
-  .navbar-collapse.collapse.show{
-    display:block !important;
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(-8px); }
+    to{ opacity:1; transform:translateY(0); }
   }
 
   .navbar-nav{
     flex-direction:column;
-    align-items:flex-start;
-    gap:6px;
-    padding-left:16px;
+    padding-left:18px;
+    gap:12px;
   }
 
   .navbar-nav .nav-link{
-    font-size:17px;
-    padding:8px 0;
-    width:100%;
-    text-align:left;
+    font-size:18px;
+    padding:6px 0;
   }
 
   .mobile-username{
     color:#fff;
     font-weight:700;
-    padding:6px 16px;
+    padding-left:18px;
+    margin-top:10px;
   }
 
   .mobile-logout{
     background:#ff4d4f;
-    border-radius:6px;
-    padding:8px 12px;
-    margin:6px 16px;
+    padding:9px 18px;
+    border-radius:8px;
+    display:inline-block;
+    margin:8px 18px 14px;
     color:#fff !important;
     font-weight:700;
-    display:inline-block;
   }
 
-  .logout-btn{
-    display:none !important;
-  }
-
-  .brand{
-    margin-left:18px;
-  }
+  .logout-btn{ display:none !important; }
+  .brand{ margin-left:18px; }
 }
 
-/* min height below navbar */
-main{
-  min-height:calc(100vh - 68px);
-}
+/* BODY SPACE */
+main{ min-height:calc(100vh - 68px); }
 </style>
 
 {% block extra_head %}{% endblock %}
@@ -163,9 +144,8 @@ main{
     </a>
 
     <button class="navbar-toggler" type="button"
-      data-bs-toggle="collapse" data-bs-target="#mainNav"
-      aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-      <svg width="26" height="18" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+      data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <svg width="26" height="18" fill="#fff">
         <rect y="1" width="26" height="2" rx="1"/>
         <rect y="8" width="26" height="2" rx="1"/>
         <rect y="15" width="26" height="2" rx="1"/>
@@ -182,12 +162,8 @@ main{
         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'customer_monthly_statement' %}active{% endif %}" href="{% url 'customer_monthly_statement' %}">Monthly Statement</a></li>
 
         {% if request.user.is_authenticated %}
-          <li class="nav-item d-block d-lg-none mt-2">
-            <span class="mobile-username">👤 {{ request.user.username }}</span>
-          </li>
-          <li class="nav-item d-block d-lg-none">
-            <a class="mobile-logout" href="{% url 'logout' %}">🚪 Logout</a>
-          </li>
+          <li class="nav-item d-block d-lg-none mt-2"><span class="mobile-username">👤 {{ request.user.username }}</span></li>
+          <li class="nav-item d-block d-lg-none"><a class="mobile-logout" href="{% url 'logout' %}">🚪 Logout</a></li>
         {% endif %}
       </ul>
     </div>
@@ -204,13 +180,12 @@ main{
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- 🔥 Menu Auto Close Script -->
+<!-- 🔥 Auto Close Menu on Link Click -->
 <script>
   document.querySelectorAll('#mainNav .nav-link').forEach(link => {
     link.addEventListener('click', () => {
       let navbar = document.getElementById('mainNav');
-      let bsCollapse = bootstrap.Collapse.getOrCreateInstance(navbar);
-      bsCollapse.hide();
+      bootstrap.Collapse.getOrCreateInstance(navbar).hide();
     });
   });
 </script>
