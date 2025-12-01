@@ -53,10 +53,18 @@ html, body{
 .navbar-nav .nav-link{
   color:#fff !important;
   font-weight:600;
+  text-align:center;
 }
 .navbar-nav .nav-link.active{
   text-decoration:underline;
   text-underline-offset:6px;
+}
+
+/* ⭐ MENU ITEMS KO RIGHT SIDE SHIFT */
+@media (min-width: 992px){
+  .navbar-nav {
+    margin-left: 250px;  /* value change karke aur right le ja sakte ho */
+  }
 }
 
 .logout-btn{
@@ -71,9 +79,8 @@ html, body{
 
 .navbar-toggler{ margin-left:auto; border:0; }
 
-/* 📌 MOBILE MENU — FAST, OVERLAY, NO CONTENT PUSH */
+/* 📌 MOBILE MENU */
 @media (max-width:992px){
-
   #mainNav{
     position:fixed;
     top:68px;
@@ -88,7 +95,6 @@ html, body{
     overflow-y:auto;
     animation:fadeIn .17s ease-out;
   }
-
   .navbar-collapse.show{ display:block !important; }
 
   @keyframes fadeIn{
@@ -100,6 +106,7 @@ html, body{
     flex-direction:column;
     padding-left:18px;
     gap:12px;
+    margin-left:0 !important;   /* ⚠ mobile me right shift nahi hoga */
   }
 
   .navbar-nav .nav-link{
@@ -138,7 +145,6 @@ main{ min-height:calc(100vh - 68px); }
 <body>
 <nav class="navbar site-navbar navbar-expand-lg">
   <div class="container-fluid d-flex align-items-center">
-
 
     <button class="navbar-toggler" type="button"
       data-bs-toggle="collapse" data-bs-target="#mainNav">
