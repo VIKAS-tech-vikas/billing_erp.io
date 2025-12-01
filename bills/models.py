@@ -179,3 +179,13 @@ class BillReturn(models.Model):
         self.bill.returned_amount = max(total_return, 0)
         self.bill.save(update_fields=['returned_amount'])
         self.bill.update_total()
+
+class BillingSettings(models.Model):
+    financial_year_start = models.CharField(max_length=10)  # format DD-MM-YYYY
+    financial_year_end = models.CharField(max_length=10)    # format DD-MM-YYYY
+    lock_date = models.CharField(max_length=10)             # format DD-MM-YYYY
+    system_date = models.CharField(max_length=10)           # format DD-MM-YYYY
+
+    def __str__(self):
+        return f"Billing Settings ({self.financial_year_start} → {self.financial_year_end})"
+

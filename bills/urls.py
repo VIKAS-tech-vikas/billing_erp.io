@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
 
     # Authentication
@@ -40,4 +41,7 @@ urlpatterns = [
     path('customer-statement/', views.customer_statement, name='customer_statement'),
     path('customer-monthly-statement/', views.customer_monthly_statement, name='customer_monthly_statement'),
     path("bill/<int:bill_id>/pay/", views.pay_bill, name="pay_bill"),
+    path("bill/<int:bill_id>/pay/", views.pay_bill, name="pay_bill"),
+    path("bill/<int:bill_id>/return/", views.return_bill, name="return_bill"),
+
 ]

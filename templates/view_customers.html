@@ -1,193 +1,168 @@
 {% extends "base.html" %}
-
 {% block title %}Customer List{% endblock %}
-
 {% block content %}
+
 <style>
- .page-wrapper {
-    display: flex;
-    justify-content: center;
-    padding: 30px 16px 60px;
-    margin-top: 35px;   /* 🔥 Page को थोड़ा नीचे लाने के लिए */
+/* ⭐ LIGHT BACKGROUND (Same theme as Create Bill) */
+body {
+  background: linear-gradient(180deg, #d7e9ff, #e9f3ff) !important;
+  min-height: 100vh;
+  padding-bottom: 40px;
 }
 
+/* ❗ Remove old glow */
+body::before,
+body::after {
+  content: none !important;
+}
 
-  .card-shell {
-    width: 100%;
-    max-width: 1100px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(3, 102, 214, 0.08);
-    padding: 34px;
+/* MAIN CARD */
+.page-wrapper { display:flex; justify-content:center; padding:30px 14px 70px; }
+.card-shell {
+  width:100%; max-width:1200px;
+  background:#fff;
+  border-radius:26px;
+  padding:40px;
+  box-shadow:0px 15px 45px rgba(0, 68, 255, 0.20);
+}
+
+/* HEADING */
+.page-title {
+  text-align:center;
+  font-size:34px;
+  font-weight:900;
+  color:#0050ff;
+  margin-bottom:28px;
+}
+
+/* SEARCH + ADD */
+.controls {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.controls form { display:flex; align-items:center; gap:10px; }
+.controls input {
+  padding:12px 14px;
+  border-radius:12px;
+  border:2px solid #b7d0ff;
+  font-size:15px;
+  width:260px;
+}
+.btn-primary {
+  background:#006bff;
+  padding:12px 20px;
+  border-radius:12px;
+  border:none;
+  color:white;
+  font-weight:750;
+  cursor:pointer;
+}
+.btn-primary:hover { transform:translateY(-3px); }
+
+/* MOBILE SEARCH FIX */
+@media(max-width:640px){
+  .controls form {
+    flex-direction: column;
+    width:100%;
   }
+  .controls input,
+  .controls button {
+    width:100% !important;
+  }
+  .controls { gap:8px; }
+}
 
-  .page-title {
+/* TABLE SCROLL BOX */
+.table-wrap {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 2px solid #dce7ff;
+}
+
+/* Scroll style */
+.table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+.table-wrap::-webkit-scrollbar-thumb { background:#90baff; border-radius: 6px; }
+.table-wrap::-webkit-scrollbar-track { background:#e9f1ff; }
+
+/* TABLE */
+table.custom-table { width:100%; border-collapse:collapse; min-width:900px; }
+thead th {
+  background:#006bff;
+  color:white;
+  padding:15px;
+  font-size:15px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+tbody td {
+  padding:13px;
+  border-top:1px solid #dce7ff;
+  font-size:15px;
+}
+tbody tr:hover { background:#eaf2ff; transition:.25s; }
+.row-success { color:#00b76a; font-weight:700; }
+.row-danger { color:#ff3d3d; font-weight:700; }
+
+/* ACTION BUTTONS */
+.action-buttons{ display:flex; gap:8px; justify-content:center; }
+.btn-sm { border:none; padding:8px 14px; font-weight:700; border-radius:10px; color:white; cursor:pointer; }
+.btn-view { background:#00c6b1; }
+.btn-edit { background:#007bff; }
+.btn-delete { background:#ff3b3b; }
+
+/* 📱 MOBILE CARD VIEW */
+@media(max-width:640px){
+  .desktop-table{ display:none; }
+  .mobile-cards{ display:block; }
+  .table-wrap{ max-height:none; border:none; }
+
+  .mobile-card{
+    background:#fff;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+    box-shadow:0 0 20px rgba(0,110,255,.12);
+  }
+  .mobile-card .title{
+    font-weight:850;
+    font-size:1.2rem;
+    color:#0050ff;
+    margin-bottom:6px;
+  }
+  .mobile-card .grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .mobile-card .cell{
+    background:#f4f7ff;
+    padding:10px;
+    border-radius:10px;
+    flex:1 1 42%;
+    font-size:0.92rem;
+  }
+  .mobile-card .actions{
     display:flex;
-    align-items:center;
+    justify-content:center;
     gap:10px;
-    justify-content:center;
-    font-size:1.6rem;
-    font-weight:800;
-    color:#222;
-    margin-bottom:18px;
-  }
-
-  .controls {
-    display:flex;
-    justify-content:center;
-    gap:12px;
-    margin-bottom:20px;
+    margin-top:15px;
     flex-wrap:wrap;
   }
-
-  .controls .search {
-    width:420px;
-    max-width:100%;
-    display:flex;
-    gap:8px;
-  }
-  .controls input[type="text"]{
-    flex:1;
-    padding:11px 12px;
-    border-radius:8px;
-    border:1px solid #bbb;
-    background:#fff;
-    outline:none;
+  .mobile-card .actions .btn-sm{
+    flex:1 1 auto;
+    text-align:center;
+    padding:10px 12px;
+    border-radius:12px;
     font-size:15px;
   }
+}
 
-  .controls .btn {
-    min-height:44px;
-    padding:10px 18px;
-    border-radius:8px;
-    font-weight:700;
-  }
-
-  /* table wrapper (horizontal scroll on very small screens) */
-  .table-wrap {
-    overflow:auto;
-    border-radius:10px;
-  }
-
-  table.custom-table {
-    width:100%;
-    border-collapse:collapse;
-    min-width:920px;
-  }
-
-  table.custom-table thead th {
-    background:#007bff;
-    color:#fff;
-    padding:14px;
-    font-weight:700;
-    text-align:center;
-  }
-
-  table.custom-table tbody td {
-    padding:14px 12px;
-    text-align:center;
-    border-top:1px solid #eee;
-    vertical-align:middle;
-    color:#333;
-  }
-
-  table.custom-table tbody tr:nth-child(even){
-    background:#f9fbff;
-  }
-
-  .action-buttons {
-    display:flex;
-    gap:8px;
-    justify-content:center;
-    flex-wrap:nowrap;
-  }
-
-  .btn-sm {
-    font-size:14px;
-    padding:7px 12px;
-    border-radius:8px;
-    font-weight:700;
-    border:0;
-    cursor:pointer;
-    display:inline-block;
-    text-decoration:none;
-  }
-
-  .btn-view { background:#0dc3d6;color:#fff; }
-  .btn-edit { background:#0b82ff;color:#fff; }
-  .btn-delete { background:#ff5864;color:#fff; }
-  .btn-collect { background:#28a745;color:#fff; }
-  .btn-disabled { background:#cfe0ff;color:#555; }
-
-  /* ---- MOBILE: stacked card layout ----
-     We'll hide the table and show cards for small screens.
-     This avoids cramped table columns and preserves actions.
-  */
-  @media(max-width:640px){
-    /* hide table version on small screens */
-    .desktop-table { display:none; }
-
-    /* show mobile cards */
-    .mobile-cards { display:block; }
-
-    .mobile-card {
-      background:#fff;
-      margin-bottom:12px;
-      border-radius:8px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.05);
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .mobile-card .row-top {
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-    }
-    .mobile-card .title {
-      font-weight:800;
-      font-size:1rem;
-      color:#222;
-    }
-    .mobile-card .sub {
-      color:#666;
-      font-size:0.85rem;
-    }
-
-    .mobile-card .grid {
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:6px;
-    }
-    .mobile-card .grid .cell {
-      flex:1 1 45%;
-      background:#f7f9ff;
-      padding:8px;
-      border-radius:6px;
-      font-size:0.92rem;
-    }
-    .mobile-card .actions {
-      display:flex;
-      gap:8px;
-      justify-content:flex-end;
-      margin-top:6px;
-    }
-
-    /* Slightly smaller paddings */
-    .card-shell { padding:14px; }
-    .controls { gap:8px; }
-    .controls .search input { padding:9px; font-size:14px; }
-  }
-
-  /* hide mobile cards on larger screens */
-  @media(min-width:641px){
-    .mobile-cards { display:none; }
-  }
+@media(min-width:641px){ .mobile-cards{ display:none; } }
 </style>
+
 
 <div class="page-wrapper">
   <div class="card-shell">
@@ -195,142 +170,85 @@
     <div class="page-title">👥 Customer List</div>
 
     <div class="controls">
-      <form method="get" class="search">
+      <form method="get">
         <input type="text" name="q" value="{{ q }}" placeholder="Search by name or phone...">
-        <button type="submit" class="btn btn-primary">Search</button>
+        <button class="btn-primary">Search</button>
       </form>
-
-      <a href="{% url 'add_customer' %}" class="btn btn-primary">+ Add Customer</a>
+      <a href="{% url 'add_customer' %}" class="btn-primary">+ Add Customer</a>
     </div>
 
     <div class="table-wrap">
 
-      {# ---------- DESKTOP / TABLET TABLE (visible on md+) ---------- #}
+      <!-- 💻 DESKTOP TABLE -->
       <div class="desktop-table">
         {% if customers %}
         <table class="custom-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th style="text-align:left;padding-left:20px;">Customer Name</th>
-              <th>Address</th>
-              <th>Total Bills</th>
-              <th>Total Amount (₹)</th>
-              <th>Paid (₹)</th>
-              <th>Remaining (₹)</th>
-              <th>Action</th>
+              <th>#</th><th>Name</th><th>Address</th><th>Bills</th>
+              <th>Total</th><th>Paid</th><th>Remaining</th><th>Action</th>
             </tr>
           </thead>
-
           <tbody>
-            {% for customer in customers %}
-            <tr data-customer-id="{{ customer.id }}">
-
-              <td data-label="#"> {{ forloop.counter }} </td>
-
-              <td data-label="Customer Name" style="text-align:left;padding-left:20px;">
-                {{ customer.name }}
+            {% for c in customers %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td style="text-align:left;padding-left:16px;">
+                <a href="{% url 'customer_detail' c.id %}" style="color:#004bcb;font-weight:700;text-decoration:none;">
+                  {{ c.name }}
+                </a>
               </td>
-
-              <td data-label="Address">{{ customer.address|default:"—" }}</td>
-
-              <td data-label="Total Bills">{{ customer.total_bills }}</td>
-
-              <td data-label="Total Amount">₹{{ customer.total_amount|floatformat:2 }}</td>
-
-              <td class="col-paid" data-label="Paid">₹{{ customer.total_paid|floatformat:2 }}</td>
-
-              <td class="col-remaining" data-label="Remaining">₹{{ customer.total_remaining|floatformat:2 }}</td>
-
-              <td data-label="Action">
+              <td>{{ c.address|default:"—" }}</td>
+              <td>{{ c.total_bills }}</td>
+              <td>₹{{ c.total_amount|floatformat:2 }}</td>
+              <td class="row-success">₹{{ c.total_paid|floatformat:2 }}</td>
+              <td class="{% if c.total_remaining != 0 %}row-danger{% else %}row-success{% endif %}">
+                ₹{{ c.total_remaining|floatformat:2 }}
+              </td>
+              <td>
                 <div class="action-buttons">
-
-                  <a href="{% url 'customer_detail' customer.id %}" class="btn-sm btn-view">View</a>
-
-                  <a href="{% url 'edit_customer' customer.id %}" class="btn-sm btn-edit">Edit</a>
-
-                  <form method="post" action="{% url 'delete_customer' customer.id %}" style="display:inline;">
+                  <a href="{% url 'customer_detail' c.id %}" class="btn-sm btn-view">View</a>
+                  <a href="{% url 'edit_customer' c.id %}" class="btn-sm btn-edit">Edit</a>
+                  <form method="post" action="{% url 'delete_customer' c.id %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn-sm btn-delete"
-                      onclick="return confirm('Delete customer {{ customer.name }}?');">Delete</button>
+                    <button class="btn-sm btn-delete" onclick="return confirm('Delete {{ c.name }}?');">Delete</button>
                   </form>
-
-                  {% if customer.total_remaining|floatformat:2 != "0.00" %}
-                
-                  {% else %}
-                    <span class="btn-sm btn-disabled">Paid</span>
-                  {% endif %}
                 </div>
               </td>
-
             </tr>
             {% endfor %}
           </tbody>
         </table>
         {% else %}
-          <div style="padding:25px;text-align:center;color:#666;">No customers found.</div>
+        <div style="padding:22px;text-align:center;color:#666;">No customers found.</div>
         {% endif %}
       </div>
-      {# ---------- end desktop table ---------- #}
 
-      {# ---------- MOBILE STACKED CARDS (visible on small screens) ---------- #}
+      <!-- 📱 MOBILE CARDS -->
       <div class="mobile-cards">
-        {% if customers %}
-          {% for customer in customers %}
-            <div class="mobile-card" id="cust-{{ customer.id }}">
-              <div class="row-top">
-                <div>
-                  <div class="title">{{ customer.name }}</div>
-                  <div class="sub">{{ customer.address|default:"—" }}</div>
-                </div>
-                <div style="text-align:right;">
-                  <div style="font-weight:800;">Bills: {{ customer.total_bills }}</div>
-                </div>
-              </div>
+        {% for c in customers %}
+        <div class="mobile-card">
+          <div class="title">{{ c.name }}</div>
+          <div class="grid">
+            <div class="cell"><b>Total:</b> ₹{{ c.total_amount|floatformat:2 }}</div>
+            <div class="cell"><b>Paid:</b> ₹{{ c.total_paid|floatformat:2 }}</div>
+            <div class="cell"><b>Remaining:</b> ₹{{ c.total_remaining|floatformat:2 }}</div>
+            <div class="cell"><b>Bills:</b> {{ c.total_bills }}</div>
+          </div>
 
-              <div class="grid">
-                <div class="cell">
-                  <div class="small text-muted">Total</div>
-                  <div>₹{{ customer.total_amount|floatformat:2 }}</div>
-                </div>
-                <div class="cell">
-                  <div class="small text-muted">Paid</div>
-                  <div>₹{{ customer.total_paid|floatformat:2 }}</div>
-                </div>
-                <div class="cell">
-                  <div class="small text-muted">Remaining</div>
-                  <div>₹{{ customer.total_remaining|floatformat:2 }}</div>
-                </div>
-                <div class="cell">
-                  <div class="small text-muted">Phone</div>
-                  <div>{{ customer.phone|default:"—" }}</div>
-                </div>
-              </div>
-
-              <div class="actions">
-                <a href="{% url 'customer_detail' customer.id %}" class="btn-sm btn-view">View</a>
-                <a href="{% url 'edit_customer' customer.id %}" class="btn-sm btn-edit">Edit</a>
-                <form method="post" action="{% url 'delete_customer' customer.id %}" style="display:inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-sm btn-delete" onclick="return confirm('Delete customer {{ customer.name }}?');">Delete</button>
-                </form>
-                {% if customer.total_remaining|floatformat:2 != "0.00" %}
-                  .
-                {% else %}
-                  <span class="btn-sm btn-disabled">Paid</span>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        {% else %}
-          <div style="padding:10px;text-align:center;color:#666;">No customers found.</div>
-        {% endif %}
+          <div class="actions">
+            <a href="{% url 'customer_detail' c.id %}" class="btn-sm btn-view">View</a>
+            <a href="{% url 'edit_customer' c.id %}" class="btn-sm btn-edit">Edit</a>
+            <form method="post" action="{% url 'delete_customer' c.id %}">
+              {% csrf_token %}
+              <button class="btn-sm btn-delete" onclick="return confirm('Delete {{ c.name }}?');">Delete</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
       </div>
-      {# ---------- end mobile cards ---------- #}
 
     </div>
-
   </div>
 </div>
-
 {% endblock %}

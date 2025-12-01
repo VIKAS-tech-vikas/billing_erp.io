@@ -10,9 +10,13 @@
 
 <style>
 :root{
-  --primary: #007bff;
-  --soft-bg: #f8f9fa;
+  --primary: #0047cc;
+  --primary-dark: #00339a;
+  --nav-bg: linear-gradient(90deg,#0056ee,#003bb0);
+  --soft-bg: #f3f6ff;
   --muted: #6c757d;
+  --radius: 14px;
+  --shadow: 0 4px 15px rgba(0,0,0,0.12);
 }
 
 html, body{
@@ -22,141 +26,116 @@ html, body{
   font-family:'Segoe UI',system-ui,Arial;
 }
 
-/* TOP NAVBAR */
+/* 🔥 NAVBAR PREMIUM */
 .site-navbar{
-  background:var(--primary);
-  padding:6px 14px;
-  min-height:68px;
+  background: var(--nav-bg);
+  padding: 8px 14px;
+  min-height: 68px;
   display:flex;
   align-items:center;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
-/* BRAND LOGO */
-.brand{
-  display:flex;
-  align-items:center;
-  margin-left:30px;
-  margin-right:25px;
-}
-.brand .logo{
-  height:50px;
-  width:auto;
+/* BRAND */
+.brand-text{
+  color:#fff;
+  font-size:22px;
+  font-weight:700;
+  margin-left:10px;
+  text-shadow:0 1px 2px rgba(0,0,0,0.3);
 }
 
-/* DESKTOP NAV */
-.navbar-nav{
-  display:flex;
-  flex-direction:row;
-  gap:18px;
-}
+/* MENUS */
 .navbar-nav .nav-link{
   color:#fff !important;
   font-weight:600;
-  text-align:center;
+  padding:6px 12px !important;
+  transition:0.22s;
+  border-radius:8px;
+}
+.navbar-nav .nav-link:hover{
+  background:rgba(255,255,255,0.13);
 }
 .navbar-nav .nav-link.active{
-  text-decoration:underline;
-  text-underline-offset:6px;
+  background:#ffffff !important;
+  color:#003bb0 !important;
 }
 
-/* ⭐ MENU ITEMS KO RIGHT SIDE SHIFT */
+/* Move menu to right on desktop */
 @media (min-width: 992px){
-  .navbar-nav {
-    margin-left: 250px;  /* value change karke aur right le ja sakte ho */
-  }
+  .navbar-nav{ margin-left:auto; }
 }
 
+/* Logout */
 .logout-btn{
-  background:#ff4d4f;
+  background:#ff4949;
   color:#fff;
-  padding:6px 12px;
+  padding:8px 18px;
   border-radius:999px;
-  font-weight:700;
+  font-size:15px;
+  margin-left:18px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
   text-decoration:none;
-  margin-left:auto;
+  font-weight:700;
 }
+.logout-btn:hover{ background:#d63d3d; }
 
-.navbar-toggler{ margin-left:auto; border:0; }
-
-/* 📌 MOBILE MENU */
+/* Mobile collapse overrides */
 @media (max-width:992px){
   #mainNav{
-    position:fixed;
-    top:68px;
-    left:0;
-    width:100%;
-    background:var(--primary);
-    padding:16px 0;
-    border-radius:0 0 14px 14px;
-    z-index:2000;
-    display:none;
-    max-height:75vh;
-    overflow-y:auto;
-    animation:fadeIn .17s ease-out;
+    background: var(--nav-bg);
+    padding:12px 0;
+    border-radius:0 0 16px 16px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.20);
   }
-  .navbar-collapse.show{ display:block !important; }
-
-  @keyframes fadeIn{
-    from{ opacity:0; transform:translateY(-8px); }
-    to{ opacity:1; transform:translateY(0); }
-  }
-
   .navbar-nav{
     flex-direction:column;
-    padding-left:18px;
-    gap:12px;
-    margin-left:0 !important;   /* ⚠ mobile me right shift nahi hoga */
+    gap:4px;
+    margin-left:0;
+    padding-left:12px;
   }
-
   .navbar-nav .nav-link{
     font-size:18px;
-    padding:6px 0;
   }
-
-  .mobile-username{
-    color:#fff;
-    font-weight:700;
-    padding-left:18px;
-    margin-top:10px;
-  }
-
+  .logout-btn{ display:none; }
   .mobile-logout{
-    background:#ff4d4f;
-    padding:9px 18px;
+    background:#ff4949;
+    padding:10px 20px;
     border-radius:8px;
     display:inline-block;
-    margin:8px 18px 14px;
+    margin:12px 18px;
     color:#fff !important;
     font-weight:700;
   }
-
-  .logout-btn{ display:none !important; }
-  .brand{ margin-left:18px; }
 }
 
-/* BODY SPACE */
-main{ min-height:calc(100vh - 68px); }
+/* MAIN */
+main{ min-height: calc(100vh - 68px); padding-bottom: 20px; }
 </style>
 
 {% block extra_head %}{% endblock %}
 </head>
 
+
 <body>
 <nav class="navbar site-navbar navbar-expand-lg">
   <div class="container-fluid d-flex align-items-center">
 
-    <button class="navbar-toggler" type="button"
+    <!-- Hamburger -->
+    <button class="navbar-toggler ms-auto" type="button"
       data-bs-toggle="collapse" data-bs-target="#mainNav">
-      <svg width="26" height="18" fill="#fff">
-        <rect y="1" width="26" height="2" rx="1"/>
-        <rect y="8" width="26" height="2" rx="1"/>
-        <rect y="15" width="26" height="2" rx="1"/>
+      <svg width="27" height="19" fill="#fff">
+        <rect y="2" width="27" height="2" rx="1"/>
+        <rect y="9" width="27" height="2" rx="1"/>
+        <rect y="16" width="27" height="2" rx="1"/>
       </svg>
     </button>
 
+    <!-- Menu -->
     <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a></li>
         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'add_customer' %}active{% endif %}" href="{% url 'add_customer' %}">Add Customer</a></li>
         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'view_customers' %}active{% endif %}" href="{% url 'view_customers' %}">View Customers</a></li>
@@ -164,13 +143,14 @@ main{ min-height:calc(100vh - 68px); }
         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'customer_statement' %}active{% endif %}" href="{% url 'customer_statement' %}">Customer Statement</a></li>
         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'customer_monthly_statement' %}active{% endif %}" href="{% url 'customer_monthly_statement' %}">Monthly Statement</a></li>
 
+        <!-- Mobile logout -->
         {% if request.user.is_authenticated %}
-          <li class="nav-item d-block d-lg-none mt-2"><span class="mobile-username">👤 {{ request.user.username }}</span></li>
-          <li class="nav-item d-block d-lg-none"><a class="mobile-logout" href="{% url 'logout' %}">🚪 Logout</a></li>
+          <li class="d-lg-none"><a class="mobile-logout" href="{% url 'logout' %}">🚪 Logout</a></li>
         {% endif %}
       </ul>
     </div>
 
+    <!-- Desktop logout -->
     {% if request.user.is_authenticated %}
       <a class="logout-btn d-none d-lg-inline-flex" href="{% url 'logout' %}">Logout</a>
     {% endif %}
@@ -183,12 +163,12 @@ main{ min-height:calc(100vh - 68px); }
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- 🔥 Auto Close Menu on Link Click -->
+<!-- Auto-close menu when mobile item clicked -->
 <script>
   document.querySelectorAll('#mainNav .nav-link').forEach(link => {
     link.addEventListener('click', () => {
-      let navbar = document.getElementById('mainNav');
-      bootstrap.Collapse.getOrCreateInstance(navbar).hide();
+      let m = bootstrap.Collapse.getOrCreateInstance(document.getElementById('mainNav'));
+      m.hide();
     });
   });
 </script>

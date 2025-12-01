@@ -17,25 +17,55 @@ from .models import Customer, Bill, BillItem, Payment, BillReturn
 # ---------------------------------------
 @login_required
 def create_bill(request):
-    customers = Customer.objects.all().order_by('name')
+    from .models import BillingSettings
+    from datetime import datetime
 
+    customers = Customer.objects.all().order_by('name')
     last_bill = Bill.objects.order_by('-bill_no').first()
     next_bill_no = 1 if not last_bill else last_bill.bill_no + 1
 
-    # 🔥 NEW — Default date (last bill wala agar exist kare, otherwise today)
     last_bill_obj = Bill.objects.order_by('-date').first()
     default_date = last_bill_obj.date if last_bill_obj else timezone.now().date()
+
+    # Fetch settings
+    settings = BillingSettings.objects.first()
+    fy_start = datetime.strptime(settings.financial_year_start, "%d-%m-%Y").strftime("%Y-%m-%d")
+    fy_end = datetime.strptime(settings.financial_year_end, "%d-%m-%Y").strftime("%Y-%m-%Y")
+    lock_date = datetime.strptime(settings.lock_date, "%d-%m-%Y").strftime("%Y-%m-%d")
+    system_date = datetime.strptime(settings.system_date, "%d-%m-%Y").strftime("%Y-%m-%d")
+
+    # Last invoice date
+    last_invoice = Bill.objects.order_by('-date').first()
+    last_invoice_date = last_invoice.date.strftime("%Y-%m-%d") if last_invoice else fy_start
 
     if request.method == 'POST':
         customer_name = request.POST.get('customer_name', '').strip()
         phone = request.POST.get('phone', '').strip()
-        bill_date = request.POST.get('date')
+        bill_date = request.POST.get('date')   # YYYY-MM-DD
 
-        # 🚫 Future date block
-        if bill_date > str(timezone.now().date()):
-            messages.error(request, "🚫 Future date not allowed.")
-            return redirect("create_bill")
+        # 🔥 BusyBee validation (no redirect, only re-render)
+        def show_error(msg):
+            messages.error(request, msg)
+            return render(request, "create_bill.html", {
+                "customers": customers,
+                "next_bill_no": next_bill_no,
+                "default_date": default_date,
+            })
 
+        if bill_date < fy_start or bill_date > fy_end:
+            return show_error("❌ Bill की तारीख Financial Year के बाहर है.")
+
+        if bill_date <= lock_date:
+            return show_error("🔒 यह महीना Locked है — इस तारीख पर Bill नहीं बन सकता।")
+
+        if bill_date > system_date:
+            return show_error("🚫 Future date allowed नहीं है।")
+
+        if bill_date < last_invoice_date:
+            return show_error(f"⏳ पिछला Bill {last_invoice_date} को बना था — "
+                              f"उसके पहले की तारीख पर Bill नहीं बना सकते।")
+
+        # 💾 Save bill if all validations pass
         selected_customer = Customer.objects.filter(name=customer_name).first()
         final_customer_name = selected_customer.name if selected_customer else customer_name
 
@@ -44,16 +74,17 @@ def create_bill(request):
             bill_no=next_bill_no,
             customer_name=final_customer_name,
             phone=phone,
-            date=bill_date,   # 👍 date save
+            date=bill_date,
         )
         return redirect('add_items', bill_id=bill.id)
 
-    return render(request, 'create_bill.html', 
- {
-        'customers': customers,
-        'next_bill_no': next_bill_no,
-        'default_date': default_date,  # 🔥 Ye line bhoolna mat
+    # ⬇ GET → show page
+    return render(request, 'create_bill.html', {
+        "customers": customers,
+        "next_bill_no": next_bill_no,
+        "default_date": default_date,
     })
+
 
 # ---------------------------------------
 # Add items to bill
@@ -62,20 +93,31 @@ def create_bill(request):
 def add_items(request, bill_id):
     bill = Bill.objects.get(id=bill_id)
 
+    # GET request (page open)
     if request.method == "GET":
         items = BillItem.objects.filter(bill=bill)
         return render(request, "add_items.html", {"bill": bill, "items": items})
 
+    # POST request (items submitted through JSON)
     if request.method == "POST" and request.headers.get("Content-Type") == "application/json":
         data = json.loads(request.body.decode("utf-8"))
-
         items = data.get("items", [])
+
+        # 🚫 If no items added → delete bill + return error
+        if len(items) == 0:
+            bill.delete()
+            return JsonResponse({
+                "success": False,
+                "message": "Bill cancelled because no items were added."
+            })
+
         packing_qty = data.get("packing_qty", 0)
         packing_rate = data.get("packing_rate", 0)
         packing_reason = data.get("packing_reason", "").strip()
         extra_reason = data.get("extra_reason", "").strip()
         extra_amount = data.get("extra_amount", 0)
 
+        # Update items list
         BillItem.objects.filter(bill=bill).delete()
         for item in items:
             BillItem.objects.create(
@@ -103,6 +145,7 @@ def add_items(request, bill_id):
         return JsonResponse({"success": True, "bill_id": bill.id})
 
     return JsonResponse({"success": False})
+
 @login_required
 def customer_monthly_statement(request):
     customer_name = request.GET.get('customer_name', '').strip()

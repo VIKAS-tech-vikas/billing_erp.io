@@ -1,63 +1,193 @@
 {% extends "base.html" %}
+{% block title %}Monthly Statement{% endblock %}
 {% block content %}
-<div class="container py-4">
 
-  <div class="text-center mb-4 d-print-none">
-    <h4 class="fw-bold text-primary">Customer Statement by Date Range</h4>
-  </div>
+<style>
+/* ⭐ LIGHT BACKGROUND (Same as Create Bill / Customer Statement) */
+body {
+  background: linear-gradient(180deg, #d7e9ff, #e9f3ff) !important;
+  min-height: 100vh;
+  margin: 0;
+  padding-bottom: 40px;
+}
 
-  <form method="GET" class="row g-2 justify-content-center mb-3 d-print-none">
-    <div class="col-md-3 col-12">
-      <input type="text" name="customer_name" value="{{ customer_name }}" class="form-control"
-        placeholder="Enter Customer Name">
-    </div>
-    <div class="col-md-3 col-12">
-      <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
-    </div>
-    <div class="col-md-3 col-12">
-      <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
-    </div>
-    <div class="col-md-2 col-12">
-      <button type="submit" class="btn btn-primary w-100">Show Statement</button>
-    </div>
-  </form>
+/* ❗ Remove previous neon / black glow */
+body::before,
+body::after {
+  content: none !important;
+}
 
+/* WRAPPER */
+.month-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 45px 16px 70px;
+}
 
-  {% if bills %}
-  <div class="invoice-box">
-      <div class="print-heading d-print-block text-center fw-bold mb-2">
-        CUSTOMER MONTHLY STATEMENT <br>
-        <span style="font-size: 15px; font-weight: 600;">
-          {{ customer_name }} — {{ start_date }} to {{ end_date }}
-        </span>
-      </div>
+/* CARD */
+.statement-card {
+  width: 100%;
+  max-width: 1250px;
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 45px 40px;
+  box-shadow: 0px 15px 45px rgba(0, 68, 255, 0.20);
+  animation: fadeCard .45s ease;
+}
+@keyframes fadeCard { from { opacity:0; transform:translateY(25px);} to {opacity:1; transform:translateY(0);} }
 
-      <table class="table-bordered text-center align-middle">
-        <thead class="table-primary">
+/* TITLE */
+.st-title {
+  font-size: 32px;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 32px;
+  color: #0050ff;
+}
+
+/* SEARCH FILTER */
+.filter-box {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.filter-box input {
+  height: 47px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid #c7d6ff;
+  padding: 0 15px;
+}
+.filter-box input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0,110,255,.55);
+}
+
+/* BUTTON */
+.show-btn {
+  padding: 12px 24px;
+  background: #006cff;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 800;
+  transition: .25s;
+}
+.show-btn:hover {
+  transform: translateY(-3px);
+}
+
+/* TABLE SCROLL */
+.table-box {
+  max-height: 460px;
+  overflow-y: auto;
+  border-radius: 16px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: 2px solid #dce7ff;
+}
+.table-box::-webkit-scrollbar { width: 8px; }
+.table-box::-webkit-scrollbar-thumb { background: #8ab7ff; border-radius: 8px; }
+.table-box::-webkit-scrollbar-track { background: #e7eeff; }
+
+/* TABLE */
+.statement-table {
+  width: 100%;
+  min-width: 950px;
+  border-collapse: collapse;
+}
+.statement-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #006bff;
+  color: #fff;
+  padding: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.statement-table tbody td {
+  padding: 14px;
+  border-top: 1px solid #dae9ff;
+  text-align: center;
+  font-size: 15px;
+}
+.statement-table tbody tr:hover {
+  background: #e7efff;
+  transition: .25s;
+}
+
+/* TOTAL ROW */
+tfoot td {
+  background: #e7f0ff;
+  font-weight: 800;
+  border-top: 2px solid #007bff;
+  padding: 16px !important;
+}
+
+/* PRINT */
+@media print {
+  header, footer, nav, .filter-box, .print-btn { display:none !important; }
+  body { background:#fff !important; }
+  .statement-card { box-shadow:none; padding:0; }
+  .table-box { max-height:none !important; overflow:visible !important; }
+  .st-title { font-size:26px !important; margin-bottom:18px !important; }
+  @page { size:A4; margin:10mm; }
+}
+
+/* MOBILE */
+@media(max-width:576px){
+  .statement-card { padding:20px 14px; border-radius:16px; }
+  input, .show-btn { width:100% !important; }
+}
+
+</style>
+
+<div class="month-wrapper">
+  <div class="statement-card">
+
+    <div class="st-title">📅 Customer Statement by Date Range</div>
+
+    <!-- FILTER -->
+    <form method="GET" class="filter-box">
+      <input type="text" name="customer_name" value="{{ customer_name }}" placeholder="Enter Customer Name">
+      <input type="date" name="start_date" value="{{ start_date }}">
+      <input type="date" name="end_date" value="{{ end_date }}">
+      <button type="submit" class="show-btn">Show Statement</button>
+    </form>
+
+    {% if bills %}
+    <!-- SCROLL TABLE -->
+    <div class="table-box">
+      <table class="statement-table">
+        <thead>
           <tr>
             <th>Date</th>
+            <th style="text-align:left; padding-left:18px;">Customer</th>
             <th>Bill No</th>
-            <th>Customer</th>
-            <th>Total Amount</th>
-            <th>Returns</th>
+            <th>Return</th>
             <th>Paid</th>
+            <th>Total Amount</th>
             <th>Remaining</th>
           </tr>
         </thead>
         <tbody>
           {% for bill in bills %}
           <tr>
-            <td>{{ bill.date|date:"M. d, Y" }}</td>
+            <td>{{ bill.date|date:"d M Y" }}</td>
+            <td style="text-align:left; padding-left:18px; font-weight:700;">{{ bill.customer_name }}</td>
             <td>{{ bill.bill_no }}</td>
-            <td>{{ bill.customer_name }}</td>
-            <td>₹{{ bill.total_display|floatformat:2 }}</td>
             <td>₹{{ bill.returns_total|floatformat:2 }}</td>
             <td>₹{{ bill.positive_paid|floatformat:2 }}</td>
-            <td>₹{{ bill.remaining_display|floatformat:2 }}</td>
+            <td style="font-weight:700;">₹{{ bill.total_display|floatformat:2 }}</td>
+            <td style="font-weight:700;">₹{{ bill.remaining_display|floatformat:2 }}</td>
           </tr>
           {% endfor %}
         </tbody>
-        <tfoot class="fw-bold">
+        <tfoot>
           <tr>
             <td colspan="3" class="text-end">Totals:</td>
             <td>₹{{ total_amount|floatformat:2 }}</td>
@@ -67,117 +197,19 @@
           </tr>
         </tfoot>
       </table>
-  </div>
-  {% else %}
-  <div class="alert alert-info text-center mt-4">
-    No statements found for this date range.
-  </div>
-  {% endif %}
-  
-  <div class="statement-buttons mb-4 d-flex justify-content-center gap-2 flex-wrap d-print-none">
-    <button class="btn btn-outline-success action-btn" type="button" onclick="window.print()">Print</button>
-  </div>
+    </div>
+    {% else %}
+      <div style="padding:20px; background:#dff6ff; border-radius:14px; text-align:center; font-size:18px;">
+        No statements found for this date range.
+      </div>
+    {% endif %}
 
+    <!-- PRINT BUTTON -->
+    <div class="text-center">
+      <button onclick="window.print()" class="show-btn print-btn" style="margin-top:12px;">🖨️ Print</button>
+    </div>
+
+  </div>
 </div>
-
-<style>
-/* Main container */
-.invoice-box {
-  width: 100%;
-  max-width: 920px;
-  margin: 0 auto;
-  border: 1px solid #000;
-  padding: 10px;
-  margin-bottom: 20px;
-  background: white;
-}
-
-/* Table */
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* Form inputs */
-input.form-control {
-  background-color: #fff !important;
-  color: #000 !important;
-}
-input.form-control::placeholder {
-  color: #6c757d !important;
-}
-
-/* Statement buttons */
-.statement-buttons .action-btn {
-  padding: 6px 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border-radius: 6px;
-  min-width: 110px;
-}
-
-/* ---------- PRINT CSS ---------- */
-@media print {
-  .d-print-none, .btn, form, footer, nav, header {
-    display: none !important;
-  }
-
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-  }
-
-  .container {
-    margin: 0 !important;
-    padding: 0 !important;
-    max-width: 100% !important;
-  }
-
-  .invoice-box {
-    width: 100% !important;
-    border: 2px solid #000 !important;
-    padding: 12px !important;
-    margin: 0 !important;
-  }
-
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 15px !important;
-  }
-
-  th, td {
-    border: 2px solid #000 !important;
-    padding: 8px 6px !important;
-  }
-
-  @page {
-    size: A4;
-    margin: 10mm;
-  }
-}
-
-/* ---------- MOBILE FIX (NO ZOOM-OUT) ---------- */
-@media (max-width: 576px) {
-  .container {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-  .invoice-box {
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  table th, table td {
-    font-size: 13px !important;
-    padding: 6px 4px !important;
-  }
-}
-
-/* Print heading */
-.print-heading { display: none; }
-@media print { .print-heading { display: block !important; } }
-</style>
 
 {% endblock %}

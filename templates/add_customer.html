@@ -1,99 +1,158 @@
 {% extends "base.html" %}
 {% block title %}Add Customer{% endblock %}
-
 {% block content %}
 
 <style>
-  .form-card {
-    max-width: 650px;
-    margin: 40px auto;
-    background: #fff;
-    padding: 35px;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  }
+/* 🌟 LIGHT SKY ABSTRACT BACKGROUND */
+/* 🌟 ULTRA CLEAN PREMIUM BACKGROUND */
+body {
+  background: linear-gradient(180deg, #f7faff 0%, #e4eeff 40%, #d5e8ff 70%, #c9e1ff 100%);
+  min-height: 100vh;
+  margin: 0;
+  position: relative;
+  overflow-x: hidden;
+}
 
-  .form-card h2 {
-    text-align: center;
-    font-weight: 800;
-    margin-bottom: 25px;
-  }
+/* Soft Center Glow */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  filter: blur(110px);
+  z-index: -1;
+  opacity: .55;
+}
 
-  label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: block;
-  }
+body::before {
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,115,255,.28);
+  animation: glowPulse 7s infinite alternate ease-in-out;
+}
 
-  /* FIXED INPUT COLORS */
-  input[type="text"],
-  input[type="number"],
-  textarea {
-      background: #ffffff !important;
-      color: #000 !important;
-      border: 1px solid #ccc !important;
-      border-radius: 8px;
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-  }
+body::after {
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,95,255,.22);
+  animation: glowPulse 9s infinite alternate ease-in-out;
+}
 
-  input:focus,
-  textarea:focus {
-      outline: none !important;
-      border-color: #007bff !important;
-      background: #ffffff !important;
-  }
+@keyframes glowPulse {
+  from { transform: translateX(-50%) translateY(0); }
+  to   { transform: translateX(-50%) translateY(42px); }
+}
 
-  .btn-save {
-    padding: 12px 20px;
-    font-weight: 700;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 150px;
-    display: block;
-    margin: 20px auto 0;
-  }
+/* ICON */
+.form-icon {
+  width: 74px;
+  filter: drop-shadow(0 4px 14px rgba(0,110,255,.6));
+  margin-bottom: 6px;
+  margin-left: 650px;  
+}
 
-  .btn-save:hover {
-    background: #005ec6;
-  }
+/* HEADING */
+.form-card h2 {
+  color: #0050ff;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+/* INPUTS */
+.input-group-custom {
+  margin-bottom: 20px;
+  text-align: left;
+  position: relative;
+}
+.input-group-custom input,
+.input-group-custom textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid rgba(175,200,255,0.95);
+  font-size: 15px;
+  transition: .22s;
+  background: #ffffff;
+}
+.input-group-custom label {
+  position: absolute;
+  top: -11px;
+  left: 16px;
+  background: white;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 650;
+  color: #0049d6;
+}
+.input-group-custom input:focus,
+.input-group-custom textarea:focus {
+  outline: none;
+  border-color: #0076ff;
+  box-shadow: 0 0 12px rgba(0,110,255,.45);
+}
+
+/* BUTTON */
+.btn-save {
+  width: 220px;
+  margin-top: 18px;
+  padding: 13px 0;
+  font-size: 17px;
+  font-weight: 800;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, #0b3ea7, #012261);
+  color: #fff;
+  box-shadow: 0 0 22px rgba(0,110,255,.55);
+  transition: .28s;
+}
+.btn-save:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 30px rgba(0,110,255,.9);
+}
+.btn-save:active {
+  transform: scale(.97);
+}
 </style>
 
-<div class="form-card">
 
+<div class="form-card">
+  <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" class="form-icon">
   <h2>Add Customer</h2>
 
   <form method="post">
     {% csrf_token %}
-
-    <label>Name:</label>
-    <input type="text" name="name" required>
-
-    <label>Phone:</label>
-    <input type="text" name="phone" id="phone" maxlength="10" required
-           oninput="this.value = this.value.replace(/[^0-9]/g,'').slice(0,10);">
-
-    <label>Address:</label>
-    <textarea name="address" rows="4"></textarea>
-
+    <div class="input-group-custom">
+      <input type="text" name="name" required>
+      <label>Name</label>
+    </div>
+    <div class="input-group-custom">
+      <input type="text" name="phone" id="phone" maxlength="10" required
+          oninput="this.value = this.value.replace(/[^0-9]/g,'').slice(0,10);">
+      <label>Phone</label>
+    </div>
+    <div class="input-group-custom">
+      <textarea name="address" rows="4"></textarea>
+      <label>Address</label>
+    </div>
     <button class="btn-save" type="submit">Save Customer</button>
   </form>
-
 </div>
 
+
 <script>
-  // Submit validation (optional but recommended)
-  document.querySelector("form").addEventListener("submit", function(e) {
-    let phone = document.getElementById("phone").value;
-    if (phone.length !== 10) {
-      alert("Phone number must be exactly 10 digits.");
-      e.preventDefault();
-    }
-  });
+document.querySelector("form").addEventListener("submit", function(e) {
+  let phone = document.getElementById("phone").value;
+  if (phone.length !== 10) {
+    alert("Phone number must be exactly 10 digits.");
+    e.preventDefault();
+  }
+});
 </script>
 
 {% endblock %}
