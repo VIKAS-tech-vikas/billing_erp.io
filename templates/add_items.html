@@ -1,24 +1,20 @@
+{% extends "base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Create Estimate | Manual Billing System</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'css/responsive.css' %}" rel="stylesheet">
+{% block title %}Create Estimate{% endblock %}
+{% block content %}
 
-  <style>
-    :root{ --accent:#007bff; --card:#fff; --muted:#eef5ff; --radius:10px; --tap:44px; }
-    body { background:#f4f6f9; font-family:'Segoe UI',sans-serif; margin:0; }
-    .card { border-radius:var(--radius); box-shadow:0 6px 18px rgba(15,23,36,0.06); border:none; }
-    .card-header { background:var(--accent); color:#fff; font-weight:600; }
-    input[readonly]{ background:#eef2f7; }
-    .btn { min-height:var(--tap); display:inline-flex; align-items:center; justify-content:center; }
-  </style>
-</head>
-<body>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="{% static 'css/responsive.css' %}" rel="stylesheet">
+
+<style>
+  :root{ --accent:#007bff; --card:#fff; --muted:#eef5ff; --radius:10px; --tap:44px; }
+  body { background:#f4f6f9; font-family:'Segoe UI',sans-serif; margin:0; }
+  .card { border-radius:var(--radius); box-shadow:0 6px 18px rgba(15,23,36,0.06); border:none; }
+  .card-header { background:var(--accent); color:#fff; font-weight:600; }
+  input[readonly]{ background:#eef2f7; }
+  .btn { min-height:var(--tap); display:inline-flex; align-items:center; justify-content:center; }
+</style>
 
 <div class="container my-4">
   <div class="card">
@@ -35,7 +31,6 @@
         <div class="col-md-3"><label class="form-label small">Customer Name</label><input type="text" class="form-control" value="{{ bill.customer_name }}" readonly></div>
         <div class="col-md-3"><label class="form-label small">Mobile</label><input type="text" class="form-control" value="{{ bill.phone }}" readonly></div>
 
-        <!-- 🔥 Calendar Added -->
         <div class="col-md-3">
           <label class="form-label small">Date</label>
           <input type="date" id="bill_date" class="form-control" value="{{ bill.date|date:'Y-m-d' }}">
@@ -62,27 +57,17 @@
       <h6 class="text-primary mb-2">Product List</h6>
       <table class="table table-bordered table-sm" id="product-table">
         <thead class="table-primary">
-        <tr><th>Product</th><th>Quantity</th><th>Rate</th><th>Total</th><th>Action</th></tr>
+          <tr><th>Product</th><th>Quantity</th><th>Rate</th><th>Total</th><th>Action</th></tr>
         </thead><tbody></tbody>
       </table>
 
       <!-- PACKING + EXTRA -->
       <div class="row g-2 mt-3">
-        <div class="col-md-4">
-          <input type="text" id="extra_reason" class="form-control" placeholder="Extra Charge / Reason">
-        </div>
-        <div class="col-md-2">
-          <input type="number" id="packing_qty" class="form-control" value="0">
-        </div>
-        <div class="col-md-2">
-          <input type="number" id="packing_rate" class="form-control" value="0">
-        </div>
-        <div class="col-md-3">
-          <input type="text" id="packing_reason" class="form-control" placeholder="Packing Reason">
-        </div>
-        <div class="col-md-1">
-          <input type="text" id="packing_total" class="form-control" readonly value="0.00">
-        </div>
+        <div class="col-md-4"><input type="text" id="extra_reason" class="form-control" placeholder="Extra Charge / Reason"></div>
+        <div class="col-md-2"><input type="number" id="packing_qty" class="form-control" value="0"></div>
+        <div class="col-md-2"><input type="number" id="packing_rate" class="form-control" value="0"></div>
+        <div class="col-md-3"><input type="text" id="packing_reason" class="form-control" placeholder="Packing Reason"></div>
+        <div class="col-md-1"><input type="text" id="packing_total" class="form-control" readonly value="0.00"></div>
       </div>
 
       <div class="text-end mt-3">
@@ -176,7 +161,7 @@ async function saveAndGenerate(){
   if(products.length === 0) return alert("Add at least 1 product");
 
   const payload = {
-    bill_date: document.getElementById("bill_date").value,   // 🔥 Date added
+    bill_date: document.getElementById("bill_date").value,
     items: products.map(p => ({
       description: p.description,
       quantity: p.qty,
@@ -206,5 +191,5 @@ async function saveAndGenerate(){
   window.open(`/generate-bill/${data.bill_id}/?print=1`, "_blank");
 }
 </script>
-</body>
-</html>
+
+{% endblock %}
