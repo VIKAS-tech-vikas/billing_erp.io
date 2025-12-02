@@ -51,7 +51,6 @@ body::after {
   to   { transform: translateX(-50%) translateY(40px); }
 }
 
-
 /* ICON & HEADING */
 .bill-icon {
   width: 75px;
@@ -123,20 +122,9 @@ body::after {
 }
 </style>
 
-
 <div class="bill-card">
   <img src="https://cdn-icons-png.flaticon.com/512/942/942748.png" class="bill-icon" alt="">
   <h2>Create New Bill</h2>
-
-  <div class="msg-area">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} text-center mb-2">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  </div>
 
   <form method="post">
     {% csrf_token %}
@@ -161,8 +149,8 @@ body::after {
     <div class="row">
       <div class="col-md-6 field-row">
         <div class="field-label">Date</div>
-        <input type="date" name="date" class="field-input"
-          value="{{ default_date|date:'Y-m-d' }}">
+     <input type="date" name="date" class="field-input"
+       value="{{ default_date }}">
       </div>
 
       <div class="col-md-6 field-row">
@@ -174,7 +162,6 @@ body::after {
     <button type="submit" class="btn-next">Continue & Add Items</button>
   </form>
 </div>
-
 
 <!-- PHONE AUTO FILL -->
 <script>

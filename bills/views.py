@@ -24,32 +24,32 @@ def create_bill(request):
     last_bill = Bill.objects.order_by('-bill_no').first()
     next_bill_no = 1 if not last_bill else last_bill.bill_no + 1
 
-    last_bill_obj = Bill.objects.order_by('-date').first()
-    default_date = last_bill_obj.date if last_bill_obj else timezone.now().date()
+    # Default date = last invoice date OR today if no invoice
+    last_invoice = Bill.objects.order_by('-date').first()
+    default_date = last_invoice.date if last_invoice else timezone.now().date()
+    default_date_str = default_date.strftime("%Y-%m-%d")     # 🔥 important
 
     # Fetch settings
     settings = BillingSettings.objects.first()
     fy_start = datetime.strptime(settings.financial_year_start, "%d-%m-%Y").strftime("%Y-%m-%d")
-    fy_end = datetime.strptime(settings.financial_year_end, "%d-%m-%Y").strftime("%Y-%m-%Y")
+    fy_end = datetime.strptime(settings.financial_year_end, "%d-%m-%Y").strftime("%Y-%m-%d")
     lock_date = datetime.strptime(settings.lock_date, "%d-%m-%Y").strftime("%Y-%m-%d")
     system_date = datetime.strptime(settings.system_date, "%d-%m-%Y").strftime("%Y-%m-%d")
 
-    # Last invoice date
-    last_invoice = Bill.objects.order_by('-date').first()
-    last_invoice_date = last_invoice.date.strftime("%Y-%m-%d") if last_invoice else fy_start
+    # Last invoice date (for validation rule only)
+    last_invoice_date = default_date_str
 
     if request.method == 'POST':
         customer_name = request.POST.get('customer_name', '').strip()
         phone = request.POST.get('phone', '').strip()
         bill_date = request.POST.get('date')   # YYYY-MM-DD
 
-        # 🔥 BusyBee validation (no redirect, only re-render)
         def show_error(msg):
             messages.error(request, msg)
             return render(request, "create_bill.html", {
                 "customers": customers,
                 "next_bill_no": next_bill_no,
-                "default_date": default_date,
+                "default_date": default_date_str,
             })
 
         if bill_date < fy_start or bill_date > fy_end:
@@ -58,14 +58,16 @@ def create_bill(request):
         if bill_date <= lock_date:
             return show_error("🔒 यह महीना Locked है — इस तारीख पर Bill नहीं बन सकता।")
 
-        if bill_date > system_date:
-            return show_error("🚫 Future date allowed नहीं है।")
+        # ⚠ future date logic hatane ke baad is line ko rehne do, commented:
+        # if bill_date > system_date:
+        #     return show_error("🚫 Future date allowed नहीं है।")
 
         if bill_date < last_invoice_date:
-            return show_error(f"⏳ पिछला Bill {last_invoice_date} को बना था — "
-                              f"उसके पहले की तारीख पर Bill नहीं बना सकते।")
+            return show_error(
+                f"⏳ पिछला Bill {last_invoice_date} को बना था — "
+                f"उसके पहले की तारीख पर Bill नहीं बना सकते।"
+            )
 
-        # 💾 Save bill if all validations pass
         selected_customer = Customer.objects.filter(name=customer_name).first()
         final_customer_name = selected_customer.name if selected_customer else customer_name
 
@@ -82,7 +84,7 @@ def create_bill(request):
     return render(request, 'create_bill.html', {
         "customers": customers,
         "next_bill_no": next_bill_no,
-        "default_date": default_date,
+        "default_date": default_date_str,   # 🔥 THIS MAKES DATE SHOW PROPERLY
     })
 
 

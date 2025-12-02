@@ -33,70 +33,74 @@ body {
 }
 
 /* 🔥 FEATURE GRID */
+/* ⭐ FEATURE GRID – equal row + equal width */
 .feature-grid {
   width: 96%;
-  max-width: 1350px;   /* ⬅ पहले 1050 थी — अब edges खली नहीं रहेंगी */
+  max-width: 1350px;
   margin: 10px auto 60px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 32px;  /* ⬅ कार्ड्स के बीच smooth space */
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 28px;
 }
 
-/* 🔥 FEATURE CARDS */
+/* ⭐ FEATURE CARDS – equal width + equal height */
 .feature-card {
+  width: 290px;          /* ✔ Every card same width */
+  height: 210px;         /* ✔ Every card same height */
   background: rgba(255,255,255,.78);
   border-radius: 20px;
-  padding: 34px 30px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* Center vertically */
+  align-items: center;       /* Center horizontally */
   text-align: center;
   border: 1px solid rgba(255,255,255,.65);
   box-shadow: 0 8px 22px rgba(0,0,0,0.10);
   transition: .26s;
   backdrop-filter: blur(6px);
   cursor: pointer;
-  position: relative;
   overflow: hidden;
+  position: relative;
 }
-.feature-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at top left, rgba(255,255,255,.45), transparent 65%);
-  opacity: 0;
-  transition: .28s;
-}
-.feature-card:hover::before { opacity: 1; }
 
+/* Icon */
+.feature-card img {
+  width: 65px;
+  height: 65px;
+  margin-bottom: 10px;
+}
+
+/* Title + Text */
+.feature-card h4 {
+  font-size: 19px;
+  font-weight: 700;
+  color: #003bb0;
+  margin-bottom: 4px;
+}
+.feature-card p {
+  font-size: 14px;
+  color: #5c6e97;
+  line-height: 18px;
+}
+
+/* Hover */
 .feature-card:hover {
   transform: translateY(-7px);
   box-shadow: 0 12px 32px rgba(0,0,0,0.20);
   border-color: #d9e4ff;
 }
 
-/* ICON */
-.feature-card img {
-  width: 78px;
-  margin-bottom: 14px;
+/* Mobile */
+@media(max-width: 500px) {
+  .feature-card {
+    width: 100% !important;   /* One per row on mobile */
+    height: 200px;
+  }
 }
 
-/* TITLE + TEXT */
-.feature-card h4 {
-  font-size: 21px;
-  font-weight: 700;
-  color: #003bb0;
-  margin-bottom: 6px;
-}
-.feature-card p {
-  font-size: 14px;
-  color: #5c6e97;
-}
-
-/* CLICK FEEDBACK */
-.feature-card:active { transform: scale(.96); }
-
-/* RESPONSIVE SMALL DEVICES */
-@media (max-width: 400px){
-  .dashboard-welcome h2 { font-size: 26px; }
-}
 </style>
 
 
